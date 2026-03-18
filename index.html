@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farch Date Converter</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a4a6e;
+    --surface: #1f5480;
+    --orange: #f5a623;
+    --orange-dark: #d4891a;
+    --white: #ffffff;
+    --muted: #93bcd8;
+    --rule: #2a6090;
+    --farch-gold-bg: rgba(245,166,35,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem 1rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .card {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--rule);
+  }
+
+  /* Shared label style */
+  .date-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .date-label.cold { color: var(--muted); }
+  .date-label.warm { color: var(--orange); }
+
+  /* Shared date value style */
+  .date-value {
+    font-size: clamp(1.1rem, 4.5vw, 2.6rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+
+  .date-value.cold { color: var(--muted); font-family: Georgia, "Times New Roman", serif; font-weight: 700; }
+  .date-value.cold .day-name { color: var(--muted); }
+
+  .date-value.warm {
+    color: var(--muted);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    margin-bottom: 0;
+  }
+  .date-value.warm.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .date-value.warm .day-name { color: var(--orange); }
+  .date-value.warm.is-farch-period { color: var(--orange); }
+
+  /* Divider between old and farch within card */
+  .inner-divider {
+    height: 1px;
+    background: var(--rule);
+    margin-bottom: 1rem;
+  }
+
+  .farch-badge {
+    display: none;
+    margin-top: 0.85rem;
+    padding: 0.6rem 0.85rem;
+    background: var(--farch-gold-bg);
+    border-left: 3px solid var(--orange);
+    border-radius: 0 4px 4px 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--orange);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .farch-badge.show { display: block; }
+
+  /* Divider between cards */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin: 0.75rem 0 0.75rem;
+    color: var(--muted);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* Converter */
+  .converter {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--rule);
+  }
+
+  .date-input-wrapper {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 480px) {
+    .date-input-wrapper {
+      flex-direction: column;
+    }
+    button {
+      width: 100%;
+    }
+  }
+
+  input[type="date"] {
+    flex: 1;
+    min-width: 0;
+    padding: 0.7rem 0.9rem;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.1rem, 5vw, 1.8rem);
+    font-weight: 700;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    color: var(--muted);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    color-scheme: dark;
+  }
+  input[type="date"]:focus { border-color: var(--orange); }
+
+  button {
+    padding: 0.7rem 1.2rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--orange);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  button:hover { background: var(--orange-dark); }
+  button:active { transform: translateY(1px); }
+
+  /* Converter result shares same date-value sizing */
+  .converted-result {
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--muted);
+    margin-bottom: 0;
+  }
+  .converted-result .day-name { color: var(--orange); }
+  .converted-result.is-farch-period { color: var(--orange); }
+  .converted-result.empty {
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    font-weight: 900;
+    color: var(--muted);
+    opacity: 0.35;
+  }
+
+  .result-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .result-row .converted-result {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: clamp(1.1rem, 4.5vw, 2.6rem);
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.75rem;
+  }
+
+  .nav-btn {
+    flex-shrink: 0;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .nav-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .nav-btn:hover {
+    color: var(--orange);
+    border-color: var(--orange);
+    background: transparent;
+  }
+
+  .nav-btn:active { transform: translateY(1px); }
+
+  @media (max-width: 480px) {
+    .nav-btn { width: 2rem; height: 2rem; font-size: 1rem; }
+  }
+
+  .converted-farch-badge {
+    display: none;
+    margin-top: 0.85rem;
+    padding: 0.6rem 0.85rem;
+    background: var(--farch-gold-bg);
+    border-left: 3px solid var(--orange);
+    border-radius: 0 4px 4px 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--orange);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .converted-farch-badge.show { display: block; }
+
+  .footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Today card: Old Date first, Farch Date second -->
+  <div class="card">
+    <div class="date-label cold">Old Date</div>
+    <div class="date-value cold" id="today-greg">—</div>
+
+    <div class="inner-divider"></div>
+
+    <div class="date-label warm">Farch Date</div>
+    <div class="date-value warm" id="today-farch">—</div>
+    <div class="farch-badge" id="today-badge">Farch is outside the regular calendar. No weekdays.</div>
+  </div>
+
+  <div class="divider">Convert any date</div>
+
+  <!-- Converter card -->
+  <div class="converter">
+    <div class="date-label cold" style="margin-bottom:0.5rem;">Old Date</div>
+    <div class="date-input-wrapper">
+      <input type="date" id="date-picker" min="1900-01-01" max="2100-12-31">
+      <button onclick="convertDate()">Convert</button>
+    </div>
+
+    <div class="inner-divider"></div>
+
+    <div class="date-label warm" style="margin-bottom:0.5rem;">Farch Date</div>
+    <div class="result-row">
+      <div class="converted-result empty" id="converted-result">Pick a date above</div>
+      <div class="nav-row">
+        <button class="nav-btn" id="btn-prev" onclick="stepDate(-1)" aria-label="Previous day">&#8592;</button>
+        <button class="nav-btn" id="btn-next" onclick="stepDate(1)" aria-label="Next day">&#8594;</button>
+      </div>
+    </div>
+    <div class="converted-farch-badge" id="converted-badge">Farch is outside the regular calendar. No weekdays.</div>
+  </div>
+
+</div>
+
+<script>
+  const FARCH_DAYS = ["Sun","Mon","Wed","Thu","Fri","Sat"];
+  const MONTH_NAMES = ["","January","February","March","April","May","June",
+                       "July","August","September","October","November","December"];
+
+  function isLeapYear(y) {
+    return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+  }
+
+  function gregorianToFarch(gDate) {
+    const year = gDate.getUTCFullYear();
+    const dec22 = new Date(Date.UTC(year, 11, 22));
+    let farchYear, farchYearStart;
+
+    if (gDate >= dec22) {
+      farchYear = year + 1;
+      farchYearStart = dec22;
+    } else {
+      farchYear = year;
+      farchYearStart = new Date(Date.UTC(year - 1, 11, 22));
+    }
+
+    const dayOfYear = Math.round((gDate - farchYearStart) / 86400000) + 1;
+
+    if (dayOfYear <= 360) {
+      const farchMonth = Math.ceil(dayOfYear / 30);
+      const farchDay = ((dayOfYear - 1) % 30) + 1;
+      const dayName = FARCH_DAYS[(farchDay - 1) % 6];
+      return {
+        year: farchYear, month: farchMonth,
+        monthName: MONTH_NAMES[farchMonth],
+        day: farchDay, dayName,
+        isFarch: false,
+        formatted: `${dayName}, ${MONTH_NAMES[farchMonth]} ${farchDay}, ${farchYear}`
+      };
+    } else {
+      const farchDay = dayOfYear - 360;
+      if (farchDay > (isLeapYear(farchYear) ? 6 : 5)) return { error: true };
+      return {
+        year: farchYear, month: 13, monthName: "Farch",
+        day: farchDay, dayName: null,
+        isFarch: true,
+        formatted: `Farch ${farchDay}, ${farchYear}`
+      };
+    }
+  }
+
+  function formatGreg(d) {
+    const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const months = ["January","February","March","April","May","June",
+                    "July","August","September","October","November","December"];
+    return `${days[d.getUTCDay()]}, ${months[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+  }
+
+  function renderToday() {
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    const result = gregorianToFarch(today);
+    const farchEl = document.getElementById('today-farch');
+    const gregEl = document.getElementById('today-greg');
+    const badgeEl = document.getElementById('today-badge');
+
+    gregEl.textContent = formatGreg(today);
+
+    if (result.isFarch) {
+      farchEl.textContent = result.formatted;
+      farchEl.classList.add('is-farch-period');
+      badgeEl.classList.add('show');
+    } else {
+      farchEl.innerHTML = `<span class="day-name">${result.dayName}</span>, ${result.monthName} ${result.day}, ${result.year}`;
+    }
+    setTimeout(() => farchEl.classList.add('visible'), 50);
+  }
+
+  let currentPickerDate = null;
+
+  function setPickerDate(dateUTC) {
+    currentPickerDate = dateUTC;
+    const y = dateUTC.getUTCFullYear();
+    const m = String(dateUTC.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(dateUTC.getUTCDate()).padStart(2, '0');
+    document.getElementById('date-picker').value = `${y}-${m}-${d}`;
+  }
+
+  function stepDate(delta) {
+    if (!currentPickerDate) return;
+    const next = new Date(currentPickerDate.getTime() + delta * 86400000);
+    setPickerDate(next);
+    convertDate();
+  }
+
+  function showNavButtons() {
+    document.getElementById('btn-prev').classList.add('visible');
+    document.getElementById('btn-next').classList.add('visible');
+  }
+
+  function convertDate() {
+    const picker = document.getElementById('date-picker');
+    const resultEl = document.getElementById('converted-result');
+    const badgeEl = document.getElementById('converted-badge');
+
+    if (!picker.value) {
+      resultEl.textContent = "Pick a date above";
+      resultEl.className = 'converted-result empty';
+      badgeEl.classList.remove('show');
+      return;
+    }
+
+    const [y, m, d] = picker.value.split('-').map(Number);
+    const gDate = new Date(Date.UTC(y, m - 1, d));
+    currentPickerDate = gDate;
+    showNavButtons();
+    const result = gregorianToFarch(gDate);
+    resultEl.className = 'converted-result';
+
+    if (!result || result.error) {
+      resultEl.textContent = "Date out of range";
+      resultEl.classList.add('empty');
+      badgeEl.classList.remove('show');
+      return;
+    }
+
+    if (result.isFarch) {
+      resultEl.textContent = result.formatted;
+      resultEl.classList.add('is-farch-period');
+      badgeEl.classList.add('show');
+    } else {
+      resultEl.innerHTML = `<span class="day-name">${result.dayName}</span>, ${result.monthName} ${result.day}, ${result.year}`;
+      badgeEl.classList.remove('show');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderToday();
+    document.getElementById('date-picker').addEventListener('keydown', e => {
+      if (e.key === 'Enter') convertDate();
+    });
+  });
+</script>
+</body>
+</html>
