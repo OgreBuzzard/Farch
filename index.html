@@ -180,6 +180,8 @@
     background: var(--orange); border-radius: 4px; z-index: 0;
   }
   .cal-cell span { position: relative; z-index: 1; }
+  .cal-cell .holiday-icon { width: 85%; height: 85%; object-fit: contain; display: block; margin: auto; transition: width 0.15s, height 0.15s; }
+  .cal-cell.highlighted .holiday-icon { width: 62%; height: 62%; }
 
   .cal-farch-intercal {
     display: flex; padding: 0.3rem 0.25rem; gap: 0.2rem;
@@ -681,7 +683,7 @@
   }
 
   function holidayImg(key) {
-    return `<span><img src="${HOLIDAY_ICONS[key]}" style="width:85%;height:85%;object-fit:contain;display:block;margin:auto;" alt="${key}"></span>`;
+    return `<span><img src="${HOLIDAY_ICONS[key]}" class="holiday-icon" alt="${key}"></span>`;
   }
 
   // ── Render Greg calendar into a container ───────────────────
