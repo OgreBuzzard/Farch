@@ -808,6 +808,19 @@
     const gregChanged  = prevGregMonthId  !== null && newGregId  !== prevGregMonthId;
     const farchChanged = prevFarchMonthId !== null && newFarchId !== prevFarchMonthId;
 
+    // If direction wasn't supplied by an arrow, infer it from whether we moved forward or back
+    function inferDir(changed, oldId, newId) {
+      if (!changed) return 0;
+      if (direction !== 0) return direction;
+      if (!oldId) return 1;
+      const [oy, om] = oldId.split('-').map(Number);
+      const [ny, nm] = newId.split('-').map(Number);
+      return (ny * 100 + nm) > (oy * 100 + om) ? 1 : -1;
+    }
+
+    const gregDir  = inferDir(gregChanged,  prevGregMonthId,  newGregId);
+    const farchDir = inferDir(farchChanged, prevFarchMonthId, newFarchId);
+
     // Update Gregorian calendar
     const gregMonthLabel = document.getElementById('greg-month-label');
     gregMonthLabel.textContent = `${GREG_MONTHS[d.getUTCMonth()].slice(0,3)} ${d.getUTCFullYear()}`;
@@ -815,8 +828,8 @@
     const gregBody = document.getElementById('greg-body');
     let gregSlide  = gregBody.querySelector('.cal-slide.slide-active');
 
-    if (gregChanged && direction !== 0) {
-      gregSlide = slideCalendar(gregBody, gregSlide, direction, (container) => {
+    if (gregChanged && gregDir !== 0) {
+      gregSlide = slideCalendar(gregBody, gregSlide, gregDir, (container) => {
         buildGregContent(container, d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
       });
     } else {
@@ -837,8 +850,8 @@
     const farchBody = document.getElementById('farch-body');
     let farchSlide  = farchBody.querySelector('.cal-slide.slide-active');
 
-    if (farchChanged && direction !== 0) {
-      farchSlide = slideCalendar(farchBody, farchSlide, direction, (container) => {
+    if (farchChanged && farchDir !== 0) {
+      farchSlide = slideCalendar(farchBody, farchSlide, farchDir, (container) => {
         buildFarchContent(container, result);
       });
     } else {
