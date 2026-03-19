@@ -643,6 +643,47 @@
     return newSlide;
   }
 
+  // ── Holiday icons ────────────────────────────────────────────
+  const HOLIDAY_ICONS = {
+    halloween:    'assets/halloween.png',
+    christmas:    'assets/christmas.png',
+    turkey:       'assets/turkey.png',
+    newyears:     'assets/newyears.png',
+  };
+
+  // Return icon key if this Greg date is a holiday, else null
+  function gregHoliday(y, m, d) {
+    // m is 0-based
+    if (m === 9  && d === 31) return 'halloween';   // Oct 31
+    if (m === 11 && d === 25) return 'christmas';   // Dec 25
+    if (m === 11 && d === 31) return 'newyears';    // Dec 31
+    // Thanksgiving: 4th Thursday in November
+    if (m === 10) {
+      let thursdays = 0;
+      for (let day = 1; day <= d; day++) {
+        if (new Date(Date.UTC(y, 10, day)).getUTCDay() === 4) thursdays++;
+      }
+      if (thursdays === 4 && new Date(Date.UTC(y, 10, d)).getUTCDay() === 4) return 'turkey';
+    }
+    return null;
+  }
+
+  // Return icon key if this Farch date is a holiday, else null
+  function farchHoliday(farchMonth, farchDay, farchYear) {
+    if (farchMonth === 10 && farchDay === 30) return 'halloween';  // Oct 30
+    if (farchMonth === 11 && farchDay === 22) return 'turkey';     // Nov 22
+    if (farchMonth === 12 && farchDay === 25) return 'christmas';  // Dec 25
+    if (farchMonth === 13) {
+      const maxFarch = isLeapYear(farchYear) ? 6 : 5;
+      if (farchDay === maxFarch) return 'newyears';                // Last day of Farch
+    }
+    return null;
+  }
+
+  function holidayImg(key) {
+    return `<img src="${HOLIDAY_ICONS[key]}" style="width:75%;height:75%;object-fit:contain;display:block;margin:auto;" alt="${key}">`;
+  }
+
   // ── Render Greg calendar into a container ───────────────────
   function buildGregContent(container, y, m, highlightDay) {
     const grid = document.createElement('div');
@@ -667,8 +708,10 @@
     const daysInMonth = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
     for (let d = 1; d <= daysInMonth; d++) {
       const cell = document.createElement('div');
-      cell.className = 'cal-cell' + (d === highlightDay ? ' highlighted' : '');
-      cell.innerHTML = `<span>${d}</span>`;
+      const isHighlighted = d === highlightDay;
+      cell.className = 'cal-cell' + (isHighlighted ? ' highlighted' : '');
+      const icon = gregHoliday(y, m, d);
+      cell.innerHTML = icon ? holidayImg(icon) : `<span>${d}</span>`;
       const day = d;
       cell.addEventListener('click', () => setDate(new Date(Date.UTC(y, m, day))));
       grid.appendChild(cell);
@@ -722,8 +765,10 @@
       const fMonth = result.month;
       for (let d = 1; d <= 30; d++) {
         const cell = document.createElement('div');
-        cell.className = 'cal-cell' + (d === result.day ? ' highlighted' : '');
-        cell.innerHTML = `<span>${d}</span>`;
+        const isHighlighted = d === result.day;
+        cell.className = 'cal-cell' + (isHighlighted ? ' highlighted' : '');
+        const icon = farchHoliday(fMonth, d, farchYear);
+        cell.innerHTML = icon ? holidayImg(icon) : `<span>${d}</span>`;
         const dayNum = d;
         cell.addEventListener('click', () => setDate(farchToGregorian(farchYear, fMonth, dayNum)));
         grid.appendChild(cell);
