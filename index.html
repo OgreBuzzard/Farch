@@ -186,7 +186,9 @@
   .cal-farch-intercal {
     display: flex; padding: 0.3rem 0.25rem; gap: 0.2rem;
   }
-  .cal-farch-intercal .cal-cell { flex: 1; aspect-ratio: 1; }
+  .cal-farch-intercal .cal-cell { flex: 1; aspect-ratio: 1; min-width: 0; }
+  .cal-farch-intercal .holiday-icon { width: 70%; height: 70%; }
+  .cal-farch-intercal .cal-cell.highlighted .holiday-icon { width: 55%; height: 55%; }
 
   .cal-farch-note {
     padding: 0.5rem 0.5rem 0.6rem;
@@ -934,177 +936,392 @@
   // that receives the scene container and renders into it.
   const CHAPTERS = [
 
-    // Chapter 1: Bad Numbers
+    // ── Chapter 1: The Problem ───────────────────────────────────
+    // No pie slice during this chapter — pie only appears from ch2 onward
     [
+      // Beat 1: opening statement
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">The calendar is broken.</div>
-          <div class="scene-body">We've inherited a system full of mismatched numbers — and we've just… accepted it.</div>
+          <div class="scene-title">Our calendar is stupid<br>and no one likes it.</div>
         `;
         animate(scene);
       },
+      // Beat 2: 7 + empty circle
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">A week is <span class="scene-highlight">7</span> days.</div>
-          <div class="scene-graphic">
-            <svg width="140" height="140" viewBox="0 0 140 140">
-              ${buildPieSlices(7, [], '#3a9fd5', '#1f5480')}
+          <div class="scene-graphic" style="display:flex;align-items:center;gap:2rem;justify-content:center;">
+            <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
+              <text xml:space="preserve" x="3.78" y="428" font-family="Work Sans, Nunito, sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
+            </svg>
+            <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="80" cy="80" r="72" fill="none" stroke="#3a9fd5" stroke-width="6"/>
             </svg>
           </div>
-          <div class="scene-body">7 is a prime number. You can't split a week into halves, thirds, or anything useful.</div>
+          <div class="scene-body">A week is <span class="scene-highlight">7</span> days.</div>
         `;
         animate(scene);
       },
+      // Beat 3: 7 + blue filled circle divided into sevenths
       (scene) => {
+        const lines7 = Array.from({length:7}, (_,i) => {
+          const a = (i * 2 * Math.PI / 7) - Math.PI/2;
+          return `<line x1="80" y1="80" x2="${(80 + 72*Math.cos(a)).toFixed(2)}" y2="${(80 + 72*Math.sin(a)).toFixed(2)}" stroke="#cc3333" stroke-width="3"/>`;
+        }).join('');
         scene.innerHTML = `
-          <div class="scene-title">Months have <span class="scene-highlight">28, 29, 30,</span> or <span class="scene-highlight">31</span> days.</div>
-          <div class="scene-body">There's a rhyme to remember which is which. The rhyme falls apart in the second half.</div>
-        `;
-        animate(scene);
-      },
-      (scene) => {
-        scene.innerHTML = `
-          <div class="scene-title">None of it fits together.</div>
-          <div class="scene-body">Weeks don't divide months. Months don't divide years. There's no particular reason it has to be this way.<br><br>That's just how it's always been.</div>
-        `;
-        animate(scene);
-      },
-    ],
-
-    // Chapter 2: Tuesday
-    [
-      (scene) => {
-        scene.innerHTML = `
-          <div class="scene-title">Step one:<br>lose <span class="scene-highlight">Tuesday</span>.</div>
-          <div class="scene-body">Tuesday is named after Tyr — a Norse god of war most people have forgotten.<br><br>We already have a month named after a war god. War doesn't need a weekday too.</div>
-        `;
-        animate(scene);
-      },
-      (scene) => {
-        scene.innerHTML = `
-          <div class="scene-title">6 days.</div>
-          <div class="scene-graphic">
-            <svg width="140" height="140" viewBox="0 0 140 140">
-              ${buildPieSlices(6, [0,1,2,3,4,5], '#f5a623', '#1f5480')}
+          <div class="scene-graphic" style="display:flex;align-items:center;gap:2rem;justify-content:center;">
+            <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
+              <text xml:space="preserve" x="3.78" y="428" font-family="Work Sans, Nunito, sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
+            </svg>
+            <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="80" cy="80" r="72" fill="#3a9fd5" stroke="#1a4a6e" stroke-width="1.5"/>
+              ${lines7}
             </svg>
           </div>
-          <div class="scene-body">Six divides cleanly into halves and thirds. Scheduling, payroll, time management — all simpler.</div>
+          <div class="scene-body">7 is a prime number. It can only be divided into <span class="scene-highlight">sevenths</span>.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 4: halves line added
+      (scene) => {
+        const lines7 = Array.from({length:7}, (_,i) => {
+          const a = (i * 2 * Math.PI / 7) - Math.PI/2;
+          return `<line x1="80" y1="80" x2="${(80 + 72*Math.cos(a)).toFixed(2)}" y2="${(80 + 72*Math.sin(a)).toFixed(2)}" stroke="#cc3333" stroke-width="3"/>`;
+        }).join('');
+        scene.innerHTML = `
+          <div class="scene-graphic" style="display:flex;align-items:center;gap:2rem;justify-content:center;">
+            <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
+              <text xml:space="preserve" x="3.78" y="428" font-family="Work Sans, Nunito, sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
+            </svg>
+            <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="80" cy="80" r="72" fill="#3a9fd5" stroke="#1a4a6e" stroke-width="1.5"/>
+              ${lines7}
+              <line x1="80" y1="8" x2="80" y2="152" stroke="#cc3333" stroke-width="5"/>
+            </svg>
+          </div>
+          <div class="scene-body">It can't be split into <span class="scene-highlight">halves</span>…</div>
+        `;
+        animate(scene);
+      },
+      // Beat 5: thirds lines added
+      (scene) => {
+        const lines7 = Array.from({length:7}, (_,i) => {
+          const a = (i * 2 * Math.PI / 7) - Math.PI/2;
+          return `<line x1="80" y1="80" x2="${(80 + 72*Math.cos(a)).toFixed(2)}" y2="${(80 + 72*Math.sin(a)).toFixed(2)}" stroke="#cc3333" stroke-width="3"/>`;
+        }).join('');
+        const thirds = Array.from({length:3}, (_,i) => {
+          const a1 = (i * 2 * Math.PI / 3) - Math.PI/2;
+          const a2 = a1 + Math.PI;
+          return `<line x1="${(80 + 72*Math.cos(a1)).toFixed(2)}" y1="${(80 + 72*Math.sin(a1)).toFixed(2)}" x2="${(80 + 72*Math.cos(a2)).toFixed(2)}" y2="${(80 + 72*Math.sin(a2)).toFixed(2)}" stroke="#cc3333" stroke-width="5"/>`;
+        }).join('');
+        scene.innerHTML = `
+          <div class="scene-graphic" style="display:flex;align-items:center;gap:2rem;justify-content:center;">
+            <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
+              <text xml:space="preserve" x="3.78" y="428" font-family="Work Sans, Nunito, sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
+            </svg>
+            <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="80" cy="80" r="72" fill="#3a9fd5" stroke="#1a4a6e" stroke-width="1.5"/>
+              ${lines7}
+              <line x1="80" y1="8" x2="80" y2="152" stroke="#cc3333" stroke-width="5"/>
+              ${thirds}
+            </svg>
+          </div>
+          <div class="scene-body">…or <span class="scene-highlight">thirds</span>. You can only cut 7 into sevenths.</div>
         `;
         animate(scene);
       },
     ],
 
-    // Chapter 3: Months
+    // ── Chapter 2: Tuesday ───────────────────────────────────────
+    // Pie slice 1 appears when this chapter begins
     [
+      // Beat 1: Tyr + Mars flanking Tuesday
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">All months are <span class="scene-highlight">30</span> days.</div>
-          <div class="scene-body">Every single one. No exceptions. No rhyme required.</div>
+          <div class="scene-graphic">
+            <img src="assets/pres/tyr-mars-tuesday.png" alt="Tyr and Mars flanking Tuesday" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">Tuesday is named after <span class="scene-highlight">Tyr</span> — a Norse god of war. We already have a month named after a war god. War doesn't need a weekday too.</div>
         `;
         animate(scene);
       },
+      // Beat 2: 6-day week split into three pairs
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">5 weeks per month.<br>60 weeks per year.</div>
-          <div class="scene-body">60 is the same number of tick marks on a clock face.<br><br>The weeks in a year are now like the seconds in a minute.</div>
+          <div class="scene-graphic">
+            <img src="assets/pres/six-day-pairs.png" alt="Six days in three pairs" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">Six days. Splits cleanly into halves, thirds, sixths. Scheduling and payroll get a lot simpler.</div>
         `;
         animate(scene);
       },
     ],
 
-    // Chapter 4: Farch
+    // ── Chapter 3: Months ────────────────────────────────────────
+    // Pie slice 2
     [
+      // Beat 1: old month lengths
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">But 60 × 6 = <span class="scene-highlight">360</span>.</div>
-          <div class="scene-body">Earth takes 365.2422 days to orbit the sun. We're 5 days short.</div>
+          <div class="scene-graphic">
+            <img src="assets/pres/old-month-lengths.png" alt="Old irregular month lengths" style="max-width:280px;width:100%;">
+          </div>
         `;
         animate(scene);
       },
+      // Beat 2: new month lengths — all 30
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">The leftover days become <span class="scene-highlight">Farch</span>.</div>
-          <div class="scene-body">A 5-day mini-month at the end of the year.<br><br>No one works on Farch. Offices closed. Schools closed. That weird week at the end of December when no one does anything? Now it has a name.</div>
+          <div class="scene-graphic">
+            <img src="assets/pres/new-month-lengths.png" alt="All months 30 days" style="max-width:280px;width:100%;">
+          </div>
+          <div class="scene-body">Every month is <span class="scene-highlight">30</span> days. No exceptions. No rhyme required.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 3: 5-week month grid
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/five-week-month.png" alt="5-week month grid" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body"><span class="scene-highlight">5</span> weeks per month. Every time.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 4: 60 weeks × 6 days = 360
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic" style="padding:1rem 0;">
+            <div style="font-family:'Nunito',sans-serif;font-size:clamp(1.4rem,5vw,2rem);font-weight:900;color:var(--white);text-align:center;letter-spacing:0.02em;">
+              60 WEEKS × 6 DAYS = <span style="color:var(--orange)">360</span>
+            </div>
+          </div>
+          <div class="scene-body">60 weeks in a year — the same as the tick marks on a clock face. The weeks in a year are like the seconds in a minute.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 5: full year grid with week numbers
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/full-year-grid.png" alt="Full Farch year with week numbers" style="max-width:360px;width:100%;">
+          </div>
         `;
         animate(scene);
       },
     ],
 
-    // Chapter 5: 360
+    // ── Chapter 4: Farch ─────────────────────────────────────────
+    // Pie slice 3
     [
+      // Beat 1: Earth + Sun + (actually 365.2422)
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title"><span class="scene-highlight">360</span> is a spectacular number.</div>
-          <div class="scene-body">Mathematicians call it a <span class="scene-highlight">colossally abundant number</span> — meaning it divides evenly in an extraordinary number of ways.</div>
+          <div class="scene-graphic">
+            <img src="assets/pres/earth-orbit.png" alt="Earth orbiting sun" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">60 × 6 = 360. But Earth takes <span class="scene-highlight">365.2422</span> days to orbit the sun. We're 5 days short.</div>
         `;
         animate(scene);
       },
+      // Beat 2: Farch introduced
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">Tap to divide 360.</div>
+          <div class="scene-graphic">
+            <img src="assets/pres/farch-intro.png" alt="Farch mini-month" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">The leftover days become <span class="scene-highlight">Farch</span> — a 5-day mini-month at the end of the year. No work. No school. That weird week when nothing happens anyway? Now it has a name.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 3: Farch lifestyle
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/farch-lifestyle.png" alt="Family walk, bed" style="max-width:320px;width:100%;">
+          </div>
+        `;
+        animate(scene);
+      },
+      // Beat 4: leap year
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/leap-farch.png" alt="Farch and Leap Farch grids" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">Leap year: Farch gets a <span class="scene-highlight">6th day</span>. The extra day moves out of February and into Farch, where it belongs.</div>
+        `;
+        animate(scene);
+      },
+    ],
+
+    // ── Chapter 5: Holidays ──────────────────────────────────────
+    // Pie slice 4
+    [
+      // Beat 1: every month starts Sunday
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/full-year-calendar.png" alt="Full year calendar" style="max-width:360px;width:100%;">
+          </div>
+          <div class="scene-body">Every month starts on <span class="scene-highlight">Sunday</span>. Every month ends on Saturday. Which means every date always falls on the same day of the week. Every year. Forever.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 2: Halloween
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic" style="display:flex;align-items:center;gap:1rem;justify-content:center;">
+            <img src="assets/halloween.png" style="width:4rem;height:4rem;object-fit:contain;">
+            <div style="text-align:left;">
+              <div style="font-size:1.8rem;font-weight:900;color:var(--white);">Oct 30</div>
+              <div style="font-size:1rem;font-weight:700;color:var(--orange);">Always Saturday</div>
+            </div>
+          </div>
+          <div class="scene-body">Halloween is always a Saturday. Trick-or-treating will never again be squeezed into a school night.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 3: Thanksgiving
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic" style="display:flex;align-items:center;gap:1rem;justify-content:center;">
+            <img src="assets/turkey.png" style="width:4rem;height:4rem;object-fit:contain;">
+            <div style="text-align:left;">
+              <div style="font-size:1.8rem;font-weight:900;color:var(--white);">Nov 22</div>
+              <div style="font-size:1rem;font-weight:700;color:var(--orange);">Always Thursday</div>
+            </div>
+          </div>
+          <div class="scene-body">Thanksgiving is always November 22nd. No more guessing.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 4: Christmas
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic" style="display:flex;align-items:center;gap:1rem;justify-content:center;">
+            <img src="assets/christmas.png" style="width:4rem;height:4rem;object-fit:contain;">
+            <div style="text-align:left;">
+              <div style="font-size:1.8rem;font-weight:900;color:var(--white);">Dec 25</div>
+              <div style="font-size:1rem;font-weight:700;color:var(--orange);">Always Sunday</div>
+            </div>
+          </div>
+          <div class="scene-body">Christmas is always a Sunday. Then 5 days of December left, then Farch, then back to Sunday January 1st.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 5: 31st birthday one-liner
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/birthday-31.png" alt="July 31st birthday person" style="max-height:220px;">
+          </div>
+          <div class="scene-body">If your birthday is on the 31st, you celebrate on the 30th now.<br>You'll be fine.</div>
+        `;
+        animate(scene);
+      },
+    ],
+
+    // ── Chapter 6: The Egyptians ─────────────────────────────────
+    // Pie slice 5
+    [
+      // Beat 1: Egyptian scroll art
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/egyptian-scroll.png" alt="Egyptian astronomical art" style="max-width:340px;width:100%;border-radius:6px;">
+          </div>
+          <div class="scene-body">The ancient Egyptians used this exact system for nearly <span class="scene-highlight">4,000 years</span>.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 2: "The Five Upon the Year"
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/five-upon-the-year.png" alt="The Five Upon the Year" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">They called their extra days <span class="scene-highlight">"The Five Upon the Year."</span></div>
+        `;
+        animate(scene);
+      },
+      // Beat 3: hieroglyphics → FARCH reveal
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic" style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
+            <img src="assets/pres/hieroglyphics.png" alt="Egyptian hieroglyphics" style="max-width:300px;width:100%;">
+            <div style="font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;">which looks like…</div>
+            <img src="assets/pres/farch-hieroglyphic.png" alt="FARcH" style="max-width:300px;width:100%;">
+          </div>
+        `;
+        animate(scene);
+      },
+      // Beat 4: interactive 360 wheel
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-body" style="margin-bottom:0.5rem;">360 divides evenly by <span class="scene-highlight">24 different numbers</span>.</div>
           ${buildInteractive360()}
         `;
         animate(scene);
         initInteractive360(scene);
       },
-    ],
-
-    // Chapter 6: The Egyptians
-    [
+      // Beat 5: Mars
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">This isn't new.</div>
-          <div class="scene-body">The ancient Egyptians used this exact system for nearly <span class="scene-highlight">4,000 years</span>.<br><br>They called their extra days "The Five Upon the Year."</div>
-        `;
-        animate(scene);
-      },
-      (scene) => {
-        scene.innerHTML = `
-          <div class="scene-title">We are extraordinarily lucky.</div>
-          <div class="scene-body">Earth spins almost exactly 365 times per orbit — close enough to 360 to make this work.<br><br>Mars spins <span class="scene-highlight">669</span> times per orbit. A terrible number. Another reason Mars would be awful.</div>
+          <div class="scene-graphic" style="font-size:4rem;text-align:center;">🔴</div>
+          <div class="scene-title">Mars spins <span class="scene-highlight">669</span> times per orbit.</div>
+          <div class="scene-body">A terrible number. Yet another reason Mars would be an awful place to live.</div>
         `;
         animate(scene);
       },
     ],
 
-    // Chapter 7: The Calendar
+    // ── Chapter 7: Imaginary Things → Beautiful Dead End ─────────
+    // Pie slice 6 — circle completes
     [
+      // Beat 1: imaginary constructs
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">Every month starts on <span class="scene-highlight">Sunday</span>.</div>
-          <div class="scene-body">Without exception. Which means every date always falls on the same weekday, every year, forever.</div>
+          <div class="scene-graphic">
+            <img src="assets/pres/imaginary-constructs.png" alt="Countries, money, laws" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">Countries. Money. Legal rights. These are all imaginary constructs that only exist because we agree that they do.</div>
         `;
         animate(scene);
       },
+      // Beat 2: gravity listed — things start floating
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">Holidays lock into place.</div>
-          <div class="scene-body">Thanksgiving is always <span class="scene-highlight">November 22nd</span>.<br>Halloween is always <span class="scene-highlight">October 30th</span> — always a Saturday.<br>Christmas is always a <span class="scene-highlight">Sunday</span>.</div>
+          <div class="scene-graphic" id="gravity-scene">
+            <img src="assets/pres/imaginary-floating.png" alt="Constructs floating away" style="max-width:320px;width:100%;" id="floating-img">
+          </div>
+          <div class="scene-body">Gravity.</div>
         `;
         animate(scene);
       },
-    ],
-
-    // Chapter 8: Beautiful Dead End
-    [
+      // Beat 3: thud — everything crashes back
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">So when do we switch?</div>
-          <div class="scene-body">We don't.<br><br>The pope said no. Congress can't even kill daylight saving time. The world is not switching calendars.</div>
+          <div class="scene-graphic">
+            <img src="assets/pres/imaginary-crashed.png" alt="Everything crashed back down" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">Wait. Gravity's real.</div>
         `;
         animate(scene);
       },
+      // Beat 4: the calendar is imaginary too
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">And yet.</div>
-          <div class="scene-body">There is something deeply human about looking at a broken inherited system and saying:<br><br><span class="scene-highlight">I know what this should look like.</span><br><br>Even if no one listens. Even if the pope says nope.</div>
+          <div class="scene-title">The calendar is imaginary too.</div>
+          <div class="scene-body">In theory, we could change it. But the entire world has to change at once. There are no half-measures — if some people use Farch and some don't, the world just got more complicated, not less.</div>
         `;
         animate(scene);
       },
+      // Beat 5: Beautiful Dead End — YOUR TEXT GOES HERE
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-title">The year ends on the longest night.</div>
-          <div class="scene-body">Then five quiet days of Farch.<br><br>Then the world begins again.</div>
+          <div class="scene-title">A beautiful dead end.</div>
+          <div class="scene-body" style="color:var(--white);font-style:italic;">[Matt's closing text goes here]</div>
         `;
         animate(scene);
       },
@@ -1173,7 +1390,8 @@
     ghost.setAttribute('stroke-width', '1');
     svg.appendChild(ghost);
 
-    const angleStep = (2 * Math.PI) / TOTAL_CHAPTERS;
+    const PIE_SLICES = 6; // always 6 — matches the 6-day week; chapter 1 has no slice
+    const angleStep = (2 * Math.PI) / PIE_SLICES;
 
     for (let i = 0; i < completedChapters; i++) {
       const startAngle = i * angleStep - Math.PI / 2;
