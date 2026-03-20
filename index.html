@@ -1362,9 +1362,9 @@
             </div>
             <!-- Slash overlay: absolutely positioned over the grid, z-index above text -->
             <div id="wm-slashes" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;">
-              <img id="slash1" src="assets/slash1_red.png" style="display:none;position:absolute;mix-blend-mode:screen;width:9rem;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
-              <img id="slash2" src="assets/slash2_red.png" style="display:none;position:absolute;mix-blend-mode:screen;width:8rem;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
-              <img id="slash3" src="assets/slash3_red.png" style="display:none;position:absolute;mix-blend-mode:screen;width:8rem;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
+              <img id="slash1" src="assets/slash1_red.png" style="display:none;position:absolute;mix-blend-mode:screen;width:3.5rem;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
+              <img id="slash2" src="assets/slash2_red.png" style="display:none;position:absolute;mix-blend-mode:screen;width:3.2rem;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
+              <img id="slash3" src="assets/slash3_red.png" style="display:none;position:absolute;mix-blend-mode:screen;width:3.2rem;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
             </div>
           </div>
           <div id="wm-caption" class="scene-body">Using prime numbers makes all our lives just a little bit harder.</div>
@@ -1959,11 +1959,13 @@
       const num   = document.getElementById(numId);
       if (!slash || !num) return;
       const r = num.getBoundingClientRect();
-      const cx = r.left - wrapRect.left + r.width  / 2;
-      const cy = r.top  - wrapRect.top  + r.height / 2;
-      const w  = parseFloat(slash.style.width) * 16; // rem→px approx
+      const wr = wrap.getBoundingClientRect();
+      const cx = r.left - wr.left + r.width  / 2;
+      const cy = r.top  - wr.top  + r.height / 2;
+      const fontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const w = parseFloat(slash.style.width) * fontSize;
       slash.style.left = (cx - w / 2) + 'px';
-      slash.style.top  = (cy - w * 0.35) + 'px'; // slashes are wider than tall
+      slash.style.top  = (cy - w * 0.38) + 'px';
     });
   }
   // Renders a static fully-built panel at the given stage
