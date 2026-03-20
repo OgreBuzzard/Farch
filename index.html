@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <title>Farch Date Converter</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&family=Work+Sans:wght@700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #1a4a6e;
@@ -409,7 +409,7 @@
   }
 
   .scene-body {
-    font-size: clamp(0.9rem, 3vw, 1.1rem);
+    font-size: clamp(1.35rem, 4.5vw, 1.65rem);
     font-weight: 600;
     color: var(--muted);
     text-align: center;
@@ -440,8 +440,54 @@
     transform: scale(1);
   }
 
-  .tap-hint {
-    position: absolute;
+  /* For persistent graphics that should not fade in/out between beats */
+  .scene-graphic-static {
+    opacity: 1;
+  }
+
+  /* ── Presentation nav arrows (above footer) ──────────────── */
+  .pres-nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.25rem 0.5rem;
+    min-height: 3.2rem;
+  }
+
+  .pres-nav-btn {
+    width: 3.2rem; height: 3.2rem;
+    background: transparent;
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 1.5rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.4s ease, transform 0.35s cubic-bezier(0.4,0,0.2,1), color 0.15s, border-color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none; -webkit-user-select: none;
+    touch-action: manipulation;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .pres-nav-btn:hover { color: var(--orange); border-color: var(--orange); }
+  .pres-nav-btn:active { transform: translateY(1px); }
+
+  .pres-nav-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .pres-nav-btn.fade-out {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+  /* back btn slides in from left, fwd from right */
+  .pres-nav-back { transform: translateX(-2rem); }
+  .pres-nav-back.visible { transform: translateX(0); }
+  .pres-nav-fwd  { transform: translateX(2rem); }
+  .pres-nav-fwd.visible  { transform: translateX(0); }
     bottom: 1rem;
     right: 1.25rem;
     font-size: 0.6rem;
@@ -533,6 +579,10 @@
 <div class="pres-overlay" id="pres-overlay">
   <div class="pres-screen" id="pres-screen">
     <!-- Scene content renders here -->
+  </div>
+  <div class="pres-nav-row">
+    <button class="pres-nav-btn pres-nav-back" id="pres-nav-back" onclick="presGoBack()">&#8592;</button>
+    <button class="pres-nav-btn pres-nav-fwd" id="pres-nav-fwd" onclick="presGoForward()">&#8594;</button>
   </div>
   <div class="pres-footer">
     <button class="pres-back-btn" onclick="closePresentation()">&#8592; Back</button>
@@ -946,93 +996,423 @@
         `;
         animate(scene);
       },
-      // Beat 2: 7 + empty circle
+      // Beat 2: 7 slides in from left, circle from right, then 7 slices fade in one by one
       (scene) => {
+        const r = 70, rCirc = 72, cx = 80, cy = 80;
+        const sliceSVG = Array.from({length:7}, (_,i) => {
+          const a1 = (i * 2*Math.PI/7) - Math.PI/2;
+          const a2 = a1 + 2*Math.PI/7;
+          const x1 = (cx + r*Math.cos(a1)).toFixed(3); const y1 = (cy + r*Math.sin(a1)).toFixed(3);
+          const x2 = (cx + r*Math.cos(a2)).toFixed(3); const y2 = (cy + r*Math.sin(a2)).toFixed(3);
+          return `<path id="slice7-${i}" d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2} Z" fill="#3a9fd5" stroke="#ffffff" stroke-width="2.5" opacity="0"/>`;
+        }).join('');
+
         scene.innerHTML = `
-          <div class="scene-graphic" style="display:flex;align-items:center;gap:2rem;justify-content:center;">
-            <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
-              <text xml:space="preserve" x="3.78" y="428" font-family="Work Sans, Nunito, sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
-            </svg>
-            <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="80" cy="80" r="72" fill="none" stroke="#3a9fd5" stroke-width="6"/>
-            </svg>
+          <div id="seven-wrap" class="scene-graphic" style="display:flex;align-items:center;gap:1rem;justify-content:center;overflow:hidden;padding-left:1.5rem;">
+            <div id="seven-num" style="transform:translateX(-120px);opacity:0;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1),opacity 0.5s ease;">
+              <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
+                <text xml:space="preserve" x="3.78" y="428" font-family="'Work Sans',sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
+              </svg>
+            </div>
+            <div id="seven-circle" style="transform:translateX(120px);opacity:0;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1),opacity 0.5s ease;">
+              <svg id="seven-svg" width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="${cx}" cy="${cy}" r="${rCirc}" fill="#ffffff"/>
+                ${sliceSVG}
+              </svg>
+            </div>
           </div>
-          <div class="scene-body">A week is <span class="scene-highlight">7</span> days.</div>
+          <div id="seven-caption" class="scene-body">A week is <span class="scene-highlight">7</span> days.</div>
+        `;
+        animate(scene);
+
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const num  = document.getElementById('seven-num');
+          const circ = document.getElementById('seven-circle');
+          if (num)  { num.style.transform  = 'translateX(0)'; num.style.opacity  = '1'; }
+          if (circ) { circ.style.transform = 'translateX(0)'; circ.style.opacity = '1'; }
+          setTimeout(() => {
+            for (let i = 0; i < 7; i++) {
+              const el = document.getElementById(`slice7-${i}`);
+              if (!el) continue;
+              el.style.transition = 'opacity 0.5s ease';
+              setTimeout(() => { el.style.opacity = '1'; }, i * 200);
+            }
+          }, 500);
+        }));
+      },
+
+      // Beat 3: circle persists. Draw halves lines outward from center.
+      (scene) => {
+        const r = 70, rCirc = 72, cx = 80, cy = 80;
+        const sliceSVG = Array.from({length:7}, (_,i) => {
+          const a1 = (i * 2*Math.PI/7) - Math.PI/2;
+          const a2 = a1 + 2*Math.PI/7;
+          const x1 = (cx + r*Math.cos(a1)).toFixed(3); const y1 = (cy + r*Math.sin(a1)).toFixed(3);
+          const x2 = (cx + r*Math.cos(a2)).toFixed(3); const y2 = (cy + r*Math.sin(a2)).toFixed(3);
+          return `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2} Z" fill="#3a9fd5" stroke="#ffffff" stroke-width="2.5"/>`;
+        }).join('');
+
+        scene.innerHTML = `
+          <div id="seven-wrap" class="scene-graphic-static" style="display:flex;align-items:center;gap:1rem;justify-content:center;padding-left:1.5rem;">
+            <div id="seven-num">
+              <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
+                <text xml:space="preserve" x="3.78" y="428" font-family="'Work Sans',sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
+              </svg>
+            </div>
+            <div id="seven-circle">
+              <svg id="seven-svg" width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="${cx}" cy="${cy}" r="${rCirc}" fill="#ffffff"/>
+                ${sliceSVG}
+              </svg>
+            </div>
+          </div>
+          <div id="seven-caption" class="scene-body">It can't be split in <span class="scene-highlight">half</span>.</div>
+        `;
+        animateCaption(scene);
+
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const svg = document.getElementById('seven-svg');
+          if (!svg) return;
+          [[0, -rCirc],[0, rCirc]].forEach(([dx, dy]) => {
+            const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+            line.classList.add('half-line');
+            line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+            line.setAttribute('x2', cx + dx); line.setAttribute('y2', cy + dy);
+            line.setAttribute('stroke','#cc3333'); line.setAttribute('stroke-width','4');
+            line.setAttribute('stroke-dasharray', rCirc);
+            line.style.strokeDashoffset = rCirc;
+            line.style.transition = 'stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1)';
+            svg.appendChild(line);
+          });
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            svg.querySelectorAll('.half-line').forEach(l => { l.style.strokeDashoffset = 0; });
+          }));
+        }));
+      },
+
+      // Beat 4: keep top half-line, reverse bottom half-line, draw lower-left and lower-right thirds spokes
+      (scene) => {
+        const r = 70, rCirc = 72, cx = 80, cy = 80;
+        const sliceSVG = Array.from({length:7}, (_,i) => {
+          const a1 = (i * 2*Math.PI/7) - Math.PI/2;
+          const a2 = a1 + 2*Math.PI/7;
+          const x1 = (cx + r*Math.cos(a1)).toFixed(3); const y1 = (cy + r*Math.sin(a1)).toFixed(3);
+          const x2 = (cx + r*Math.cos(a2)).toFixed(3); const y2 = (cy + r*Math.sin(a2)).toFixed(3);
+          return `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2} Z" fill="#3a9fd5" stroke="#ffffff" stroke-width="2.5"/>`;
+        }).join('');
+        // Top half stays fully drawn. Bottom half will be reverse-animated.
+        const halvesHTML = `
+          <line id="half-top" x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy-rCirc}" stroke="#cc3333" stroke-width="4" stroke-dasharray="${rCirc}" style="stroke-dashoffset:0;"/>
+          <line id="half-bot" x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy+rCirc}" stroke="#cc3333" stroke-width="4" stroke-dasharray="${rCirc}" style="stroke-dashoffset:0;transition:stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1);"/>
+        `;
+
+        scene.innerHTML = `
+          <div id="seven-wrap" class="scene-graphic-static" style="display:flex;align-items:center;gap:1rem;justify-content:center;padding-left:1.5rem;">
+            <div id="seven-num">
+              <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
+                <text xml:space="preserve" x="3.78" y="428" font-family="'Work Sans',sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
+              </svg>
+            </div>
+            <div id="seven-circle">
+              <svg id="seven-svg" width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="${cx}" cy="${cy}" r="${rCirc}" fill="#ffffff"/>
+                ${sliceSVG}
+                ${halvesHTML}
+              </svg>
+            </div>
+          </div>
+          <div id="seven-caption" class="scene-body">Or into <span class="scene-highlight">thirds</span>.</div>
+        `;
+        animateCaption(scene);
+
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const svg = document.getElementById('seven-svg');
+          if (!svg) return;
+          // Reverse only the bottom half
+          const bot = document.getElementById('half-bot');
+          if (bot) bot.style.strokeDashoffset = rCirc;
+
+          // After reverse, draw lower-right (330° from 12) and lower-left (210° from 12)
+          // 330° = -30° = -Math.PI/6 from positive x, offset by -Math.PI/2 = 5*Math.PI/6 - Math.PI/2... 
+          // Simpler: 120° clockwise from top = Math.PI/2 + 2*Math.PI/3 - Math.PI = just use direct angles
+          // Top spoke is straight up (270° from positive x = -Math.PI/2)
+          // Other two are 120° apart: 30° from positive x (lower-right) and 150° from positive x (lower-left)
+          const thirdsAngles = [
+            Math.PI/6,        // 30° = lower-right
+            5*Math.PI/6,      // 150° = lower-left
+          ];
+          setTimeout(() => {
+            thirdsAngles.forEach((a, i) => {
+              const ex = (cx + rCirc*Math.cos(a)).toFixed(3);
+              const ey = (cy + rCirc*Math.sin(a)).toFixed(3);
+              const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+              line.classList.add('third-line');
+              line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+              line.setAttribute('x2', ex); line.setAttribute('y2', ey);
+              line.setAttribute('stroke','#cc3333'); line.setAttribute('stroke-width','4');
+              line.setAttribute('stroke-dasharray', rCirc);
+              line.style.strokeDashoffset = rCirc;
+              line.style.transition = `stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1) ${i*0.05}s`;
+              svg.appendChild(line);
+            });
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+              svg.querySelectorAll('.third-line').forEach(l => { l.style.strokeDashoffset = 0; });
+            }));
+          }, 700);
+        }));
+      },
+
+      // Beat 5: reverse thirds, draw all 7 spokes (forward); or slide in with spokes drawn (backward)
+      (scene) => {
+        const r = 70, rCirc = 72, cx = 80, cy = 80;
+        const sliceSVG = Array.from({length:7}, (_,i) => {
+          const a1 = (i * 2*Math.PI/7) - Math.PI/2;
+          const a2 = a1 + 2*Math.PI/7;
+          const x1 = (cx + r*Math.cos(a1)).toFixed(3); const y1 = (cy + r*Math.sin(a1)).toFixed(3);
+          const x2 = (cx + r*Math.cos(a2)).toFixed(3); const y2 = (cy + r*Math.sin(a2)).toFixed(3);
+          return `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2} Z" fill="#3a9fd5" stroke="#ffffff" stroke-width="2.5"/>`;
+        }).join('');
+        // 7 spokes — fully drawn when arriving backward, animated when arriving forward
+        const spokesHTML = Array.from({length:7}, (_,i) => {
+          const a = (i * 2*Math.PI/7) - Math.PI/2;
+          const ex = (cx + rCirc*Math.cos(a)).toFixed(3);
+          const ey = (cy + rCirc*Math.sin(a)).toFixed(3);
+          return `<line x1="${cx}" y1="${cy}" x2="${ex}" y2="${ey}" stroke="#cc3333" stroke-width="3" stroke-dasharray="${rCirc}" style="stroke-dashoffset:0;"/>`;
+        }).join('');
+
+        const goingBack = presDirection === -1;
+
+        if (goingBack) {
+          // Slide in from off-screen with everything already drawn
+          scene.innerHTML = `
+            <div id="seven-wrap" class="scene-graphic" style="display:flex;align-items:center;gap:1rem;justify-content:center;overflow:hidden;padding-left:1.5rem;">
+              <div id="seven-num" style="transform:translateX(-120px);opacity:0;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1),opacity 0.5s ease;">
+                <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
+                  <text xml:space="preserve" x="3.78" y="428" font-family="'Work Sans',sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
+                </svg>
+              </div>
+              <div id="seven-circle" style="transform:translateX(120px);opacity:0;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1),opacity 0.5s ease;">
+                <svg id="seven-svg" width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="${cx}" cy="${cy}" r="${rCirc}" fill="#ffffff"/>
+                  ${sliceSVG}
+                  ${spokesHTML}
+                </svg>
+              </div>
+            </div>
+            <div id="seven-caption" class="scene-body">Only <span class="scene-highlight">sevenths</span>.</div>
+          `;
+          animate(scene);
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            const num  = document.getElementById('seven-num');
+            const circ = document.getElementById('seven-circle');
+            if (num)  { num.style.transform  = 'translateX(0)'; num.style.opacity  = '1'; }
+            if (circ) { circ.style.transform = 'translateX(0)'; circ.style.opacity = '1'; }
+          }));
+
+        } else {
+          // Arriving forward: thirds start drawn, reverse them, then draw 7 spokes
+          const thirdsHTML = [
+            `<line class="third-line" id="third-top" x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy-rCirc}" stroke="#cc3333" stroke-width="4" stroke-dasharray="${rCirc}" style="stroke-dashoffset:0;transition:stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1);"/>`,
+            ...[Math.PI/6, 5*Math.PI/6].map(a => {
+              const ex = (cx + rCirc*Math.cos(a)).toFixed(3);
+              const ey = (cy + rCirc*Math.sin(a)).toFixed(3);
+              return `<line class="third-line" x1="${cx}" y1="${cy}" x2="${ex}" y2="${ey}" stroke="#cc3333" stroke-width="4" stroke-dasharray="${rCirc}" style="stroke-dashoffset:0;transition:stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1);"/>`;
+            })
+          ].join('');
+
+          scene.innerHTML = `
+            <div id="seven-wrap" class="scene-graphic-static" style="display:flex;align-items:center;gap:1rem;justify-content:center;padding-left:1.5rem;">
+              <div id="seven-num">
+                <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
+                  <text xml:space="preserve" x="3.78" y="428" font-family="'Work Sans',sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
+                </svg>
+              </div>
+              <div id="seven-circle">
+                <svg id="seven-svg" width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="${cx}" cy="${cy}" r="${rCirc}" fill="#ffffff"/>
+                  ${sliceSVG}
+                  ${thirdsHTML}
+                </svg>
+              </div>
+            </div>
+            <div id="seven-caption" class="scene-body">Only <span class="scene-highlight">sevenths</span>.</div>
+          `;
+          animateCaption(scene);
+
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            const svg = document.getElementById('seven-svg');
+            if (!svg) return;
+            svg.querySelectorAll('.third-line').forEach(l => { l.style.strokeDashoffset = rCirc; });
+            setTimeout(() => {
+              for (let i = 0; i < 7; i++) {
+                const a = (i * 2*Math.PI/7) - Math.PI/2;
+                const ex = (cx + rCirc*Math.cos(a)).toFixed(3);
+                const ey = (cy + rCirc*Math.sin(a)).toFixed(3);
+                const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+                line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+                line.setAttribute('x2', ex); line.setAttribute('y2', ey);
+                line.setAttribute('stroke','#cc3333'); line.setAttribute('stroke-width','3');
+                line.setAttribute('stroke-dasharray', rCirc);
+                line.style.strokeDashoffset = rCirc;
+                line.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.25,0,0.1,1)';
+                svg.appendChild(line);
+              }
+              requestAnimationFrame(() => requestAnimationFrame(() => {
+                svg.querySelectorAll('line:not(.third-line)').forEach(l => { l.style.strokeDashoffset = 0; });
+              }));
+            }, 650);
+          }));
+        }
+      },
+
+      // Beat 6: 31 + orange circle with 31 slices fading in (0.5s each, 0.05s stagger)
+      (scene) => {
+        const r = 70, rCirc = 72, cx = 80, cy = 80;
+        const sliceSVG = Array.from({length:31}, (_,i) => {
+          const a1 = (i * 2*Math.PI/31) - Math.PI/2;
+          const a2 = a1 + 2*Math.PI/31;
+          const x1 = (cx + r*Math.cos(a1)).toFixed(3); const y1 = (cy + r*Math.sin(a1)).toFixed(3);
+          const x2 = (cx + r*Math.cos(a2)).toFixed(3); const y2 = (cy + r*Math.sin(a2)).toFixed(3);
+          return `<path id="slice31-${i}" d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2} Z"
+            fill="#f5a623" stroke="#ffffff" stroke-width="1.5" opacity="0"/>`;
+        }).join('');
+
+        scene.innerHTML = `
+          <div id="thirtyone-wrap" class="scene-graphic" style="display:flex;align-items:center;gap:1rem;justify-content:center;overflow:hidden;padding-left:1rem;">
+            <div id="thirtyone-num" style="transform:translateX(-120px);opacity:0;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1),opacity 0.5s ease;">
+              <svg viewBox="0 0 580 457" width="128" height="101" xmlns="http://www.w3.org/2000/svg">
+                <text xml:space="preserve" x="3.78" y="428" font-family="'Work Sans',sans-serif" font-size="576" font-weight="700" fill="#ffffff">31</text>
+              </svg>
+            </div>
+            <div id="thirtyone-circle" style="transform:translateX(120px);opacity:0;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1),opacity 0.5s ease;">
+              <svg id="thirtyone-svg" width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="${cx}" cy="${cy}" r="${rCirc}" fill="#ffffff"/>
+                ${sliceSVG}
+              </svg>
+            </div>
+          </div>
+          <div class="scene-body">Months are even worse. They only split into <span class="scene-highlight">thirty-oneths</span>.</div>
+        `;
+        animate(scene);
+
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const num  = document.getElementById('thirtyone-num');
+          const circ = document.getElementById('thirtyone-circle');
+          if (num)  { num.style.transform  = 'translateX(0)'; num.style.opacity  = '1'; }
+          if (circ) { circ.style.transform = 'translateX(0)'; circ.style.opacity = '1'; }
+          setTimeout(() => {
+            for (let i = 0; i < 31; i++) {
+              const el = document.getElementById(`slice31-${i}`);
+              if (!el) continue;
+              el.style.transition = 'opacity 0.5s ease';
+              setTimeout(() => { el.style.opacity = '1'; }, i * 50);
+            }
+          }, 500);
+        }));
+      },
+
+      // ── Beats 7-10: Week/Month crossout panel ──────────────────
+      // Shared layout: position:relative wrapper, numbers in fixed slots,
+      // slash images absolutely positioned over each number.
+      // All numbers white. Slashes revealed via clip-path animation.
+
+      // Beat 7: render the full panel once. All numbers present, 30/28/29 invisible.
+      (scene) => {
+        const ff = "'Work Sans',sans-serif";
+        const fs = '2.6rem';
+        const fw = '700';
+        const numW = '3.5rem';
+        scene.innerHTML = `
+          <div class="scene-graphic" id="wm-wrap">
+            <div style="display:inline-flex;flex-direction:column;gap:0.5rem;padding:0.5rem 1rem;">
+              <div style="display:flex;align-items:baseline;gap:2.5rem;">
+                <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;min-width:6rem;">Week</span>
+                <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;width:${numW};text-align:right;">7</span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:2.5rem;">
+                <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;min-width:6rem;">Month</span>
+                <span style="position:relative;width:${numW};text-align:right;">
+                  <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;" id="wm-31">31</span>
+                  <img id="slash1" src="assets/slash1_red.png" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;width:130%;pointer-events:none;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
+                </span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:2.5rem;opacity:0;transition:opacity 0.3s ease;" id="wm-row-30">
+                <span style="min-width:6rem;"></span>
+                <span style="position:relative;width:${numW};text-align:right;">
+                  <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;">30</span>
+                  <img id="slash2" src="assets/slash2_red.png" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;width:130%;pointer-events:none;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
+                </span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:2.5rem;opacity:0;transition:opacity 0.3s ease;" id="wm-row-28">
+                <span style="min-width:6rem;"></span>
+                <span style="position:relative;width:${numW};text-align:right;">
+                  <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;">28</span>
+                  <img id="slash3" src="assets/slash3_red.png" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;width:130%;pointer-events:none;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
+                </span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:2.5rem;opacity:0;transition:opacity 0.3s ease;" id="wm-row-29">
+                <span style="min-width:6rem;"></span>
+                <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;width:${numW};text-align:right;">29</span>
+              </div>
+            </div>
+          </div>
+          <div id="wm-caption" class="scene-body">Using prime numbers makes all our lives just a little bit harder.</div>
         `;
         animate(scene);
       },
-      // Beat 3: 7 + blue filled circle divided into sevenths
+
+      // Beat 8: show 30, animate slash over 31 — no HTML rebuild
       (scene) => {
-        const lines7 = Array.from({length:7}, (_,i) => {
-          const a = (i * 2 * Math.PI / 7) - Math.PI/2;
-          return `<line x1="80" y1="80" x2="${(80 + 72*Math.cos(a)).toFixed(2)}" y2="${(80 + 72*Math.sin(a)).toFixed(2)}" stroke="#cc3333" stroke-width="3"/>`;
-        }).join('');
-        scene.innerHTML = `
-          <div class="scene-graphic" style="display:flex;align-items:center;gap:2rem;justify-content:center;">
-            <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
-              <text xml:space="preserve" x="3.78" y="428" font-family="Work Sans, Nunito, sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
-            </svg>
-            <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="80" cy="80" r="72" fill="#3a9fd5" stroke="#1a4a6e" stroke-width="1.5"/>
-              ${lines7}
-            </svg>
-          </div>
-          <div class="scene-body">7 is a prime number. It can only be divided into <span class="scene-highlight">sevenths</span>.</div>
-        `;
-        animate(scene);
+        // If panel already exists (forward nav), mutate it
+        const existing = document.getElementById('wm-wrap');
+        if (existing) {
+          document.getElementById('wm-row-30').style.opacity = '1';
+          const s1 = document.getElementById('slash1');
+          if (s1) { s1.style.display = 'block'; requestAnimationFrame(() => requestAnimationFrame(() => { s1.style.clipPath = 'inset(0 0% 0 0)'; })); }
+          const cap = document.getElementById('wm-caption');
+          if (cap) { cap.style.opacity = '0'; cap.style.transform = 'translateY(12px)'; requestAnimationFrame(() => requestAnimationFrame(() => { cap.style.transition = 'opacity 1.4s cubic-bezier(0.25,0,0.1,1) 0.3s, transform 1.4s cubic-bezier(0.25,0,0.1,1) 0.3s'; cap.textContent = 'Not to mention having some months that are shorter…'; cap.style.opacity = '1'; cap.style.transform = 'translateY(0)'; })); }
+        } else {
+          // Arriving via back nav — rebuild and show stage 1
+          scene.innerHTML = wmPanelFull(1);
+          animateCaption(scene);
+          requestAnimationFrame(() => requestAnimationFrame(() => { const s = document.getElementById('slash1'); if (s) { s.style.display='block'; s.style.clipPath='inset(0 0% 0 0)'; } }));
+        }
       },
-      // Beat 4: halves line added
+
+      // Beat 9: show 28, animate slash over 30
       (scene) => {
-        const lines7 = Array.from({length:7}, (_,i) => {
-          const a = (i * 2 * Math.PI / 7) - Math.PI/2;
-          return `<line x1="80" y1="80" x2="${(80 + 72*Math.cos(a)).toFixed(2)}" y2="${(80 + 72*Math.sin(a)).toFixed(2)}" stroke="#cc3333" stroke-width="3"/>`;
-        }).join('');
-        scene.innerHTML = `
-          <div class="scene-graphic" style="display:flex;align-items:center;gap:2rem;justify-content:center;">
-            <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
-              <text xml:space="preserve" x="3.78" y="428" font-family="Work Sans, Nunito, sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
-            </svg>
-            <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="80" cy="80" r="72" fill="#3a9fd5" stroke="#1a4a6e" stroke-width="1.5"/>
-              ${lines7}
-              <line x1="80" y1="8" x2="80" y2="152" stroke="#cc3333" stroke-width="5"/>
-            </svg>
-          </div>
-          <div class="scene-body">It can't be split into <span class="scene-highlight">halves</span>…</div>
-        `;
-        animate(scene);
+        const existing = document.getElementById('wm-wrap');
+        if (existing) {
+          document.getElementById('wm-row-28').style.opacity = '1';
+          const s2 = document.getElementById('slash2');
+          if (s2) { s2.style.display = 'block'; requestAnimationFrame(() => requestAnimationFrame(() => { s2.style.clipPath = 'inset(0 0% 0 0)'; })); }
+          const cap = document.getElementById('wm-caption');
+          if (cap) { cap.style.opacity = '0'; cap.style.transform = 'translateY(12px)'; requestAnimationFrame(() => requestAnimationFrame(() => { cap.style.transition = 'opacity 1.4s cubic-bezier(0.25,0,0.1,1) 0.3s, transform 1.4s cubic-bezier(0.25,0,0.1,1) 0.3s'; cap.textContent = "and one that's really short…"; cap.style.opacity = '1'; cap.style.transform = 'translateY(0)'; })); }
+        } else {
+          scene.innerHTML = wmPanelFull(2);
+          animateCaption(scene);
+          requestAnimationFrame(() => requestAnimationFrame(() => { const s = document.getElementById('slash2'); if (s) { s.style.display='block'; s.style.clipPath='inset(0 0% 0 0)'; } }));
+        }
       },
-      // Beat 5: thirds lines added
+
+      // Beat 10: show 29, animate slash over 28
       (scene) => {
-        const lines7 = Array.from({length:7}, (_,i) => {
-          const a = (i * 2 * Math.PI / 7) - Math.PI/2;
-          return `<line x1="80" y1="80" x2="${(80 + 72*Math.cos(a)).toFixed(2)}" y2="${(80 + 72*Math.sin(a)).toFixed(2)}" stroke="#cc3333" stroke-width="3"/>`;
-        }).join('');
-        const thirds = Array.from({length:3}, (_,i) => {
-          const a1 = (i * 2 * Math.PI / 3) - Math.PI/2;
-          const a2 = a1 + Math.PI;
-          return `<line x1="${(80 + 72*Math.cos(a1)).toFixed(2)}" y1="${(80 + 72*Math.sin(a1)).toFixed(2)}" x2="${(80 + 72*Math.cos(a2)).toFixed(2)}" y2="${(80 + 72*Math.sin(a2)).toFixed(2)}" stroke="#cc3333" stroke-width="5"/>`;
-        }).join('');
-        scene.innerHTML = `
-          <div class="scene-graphic" style="display:flex;align-items:center;gap:2rem;justify-content:center;">
-            <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
-              <text xml:space="preserve" x="3.78" y="428" font-family="Work Sans, Nunito, sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
-            </svg>
-            <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="80" cy="80" r="72" fill="#3a9fd5" stroke="#1a4a6e" stroke-width="1.5"/>
-              ${lines7}
-              <line x1="80" y1="8" x2="80" y2="152" stroke="#cc3333" stroke-width="5"/>
-              ${thirds}
-            </svg>
-          </div>
-          <div class="scene-body">…or <span class="scene-highlight">thirds</span>. You can only cut 7 into sevenths.</div>
-        `;
-        animate(scene);
+        const existing = document.getElementById('wm-wrap');
+        if (existing) {
+          document.getElementById('wm-row-29').style.opacity = '1';
+          const s3 = document.getElementById('slash3');
+          if (s3) { s3.style.display = 'block'; requestAnimationFrame(() => requestAnimationFrame(() => { s3.style.clipPath = 'inset(0 0% 0 0)'; })); }
+          const cap = document.getElementById('wm-caption');
+          if (cap) { cap.style.opacity = '0'; cap.style.transform = 'translateY(12px)'; requestAnimationFrame(() => requestAnimationFrame(() => { cap.style.transition = 'opacity 1.4s cubic-bezier(0.25,0,0.1,1) 0.3s, transform 1.4s cubic-bezier(0.25,0,0.1,1) 0.3s'; cap.textContent = 'but also sometimes longer.'; cap.style.opacity = '1'; cap.style.transform = 'translateY(0)'; })); }
+        } else {
+          scene.innerHTML = wmPanelFull(3);
+          animateCaption(scene);
+          requestAnimationFrame(() => requestAnimationFrame(() => { const s = document.getElementById('slash3'); if (s) { s.style.display='block'; s.style.clipPath='inset(0 0% 0 0)'; } }));
+        }
       },
+
     ],
 
-    // ── Chapter 2: Tuesday ───────────────────────────────────────
-    // Pie slice 1 appears when this chapter begins
     [
       // Beat 1: Tyr + Mars flanking Tuesday
       (scene) => {
@@ -1343,27 +1723,309 @@
     });
   }
 
-  function renderBeat() {
-    const screen = document.getElementById('pres-screen');
-    screen.innerHTML = '<div class="scene" id="current-scene"></div><div class="tap-hint">tap to continue</div>';
-    const scene = document.getElementById('current-scene');
-    CHAPTERS[currentChapter][currentBeat](scene);
-    drawProgressPie();
+  // For beats where the graphic persists — only fade in the caption text
+  function animateCaption(scene) {
+    requestAnimationFrame(() => {
+      scene.querySelectorAll('.scene-title, .scene-body').forEach(el => {
+        requestAnimationFrame(() => el.classList.add('visible'));
+      });
+    });
   }
 
-  function advanceBeat() {
+  function renderBeat() {
+    // If the Week/Month panel exists and the next beat is within the same panel group,
+    // don't wipe the screen — let the beat function mutate the existing DOM instead.
+    const wmExists = document.getElementById('wm-wrap');
+    const wmBeats = new Set([7,8,9,10]); // chapter 1 beat indices (0-based: 7,8,9,10 = index 7-10)
+    const isWmBeat = currentChapter === 0 && wmBeats.has(currentBeat);
+
+    if (!(wmExists && isWmBeat)) {
+      const screen = document.getElementById('pres-screen');
+      screen.innerHTML = '<div class="scene" id="current-scene"></div><div class="tap-hint" style="display:none;"></div>';
+    }
+
+    const scene = document.getElementById('current-scene') || document.querySelector('.scene');
+    CHAPTERS[currentChapter][currentBeat](scene);
+    drawProgressPie();
+
+    // Back arrow
+    updateBackArrow();
+
+    // Forward arrow
+    if (isLastBeat()) {
+      hideFwdArrow(true);
+    } else {
+      const delay = presFirstBeat ? 1400 : 0;
+      presFirstBeat = false;
+      showFwdArrow(delay);
+    }
+  }
+
+  let presFirstBeat = true; // track if this is the very first beat of the session
+  let presDirection = 1;    // 1 = forward, -1 = backward
+  let presNavFwdTimer = null;
+  let presNavFwdVisible = false; // track whether fwd arrow is currently shown
+
+  function showFwdArrow(delay) {
+    const btn = document.getElementById('pres-nav-fwd');
+    if (!btn) return;
+    clearTimeout(presNavFwdTimer);
+    if (presNavFwdVisible) {
+      // Already visible — no animation needed, just ensure classes are right
+      btn.classList.remove('fade-out');
+      btn.classList.add('visible');
+      return;
+    }
+    // First appearance — slide in after delay
+    btn.classList.remove('visible', 'fade-out');
+    presNavFwdTimer = setTimeout(() => {
+      btn.classList.add('visible');
+      presNavFwdVisible = true;
+    }, delay);
+  }
+
+  function hideFwdArrow(fade) {
+    const btn = document.getElementById('pres-nav-fwd');
+    if (!btn) return;
+    clearTimeout(presNavFwdTimer);
+    presNavFwdVisible = false;
+    if (fade) {
+      btn.classList.remove('visible');
+      btn.classList.add('fade-out');
+    } else {
+      btn.classList.remove('visible', 'fade-out');
+    }
+  }
+
+  function updateBackArrow() {
+    const btn = document.getElementById('pres-nav-back');
+    if (!btn) return;
+    const hasPrev = currentChapter > 0 || currentBeat > 0;
+    if (hasPrev) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  }
+
+  function isLastBeat() {
+    return currentChapter === TOTAL_CHAPTERS - 1 &&
+           currentBeat === CHAPTERS[currentChapter].length - 1;
+  }
+
+  function presGoForward() {
+    presDirection = 1;
     const chapter = CHAPTERS[currentChapter];
+
+    // If leaving beat 6 (31 circle), animate it out first
+    const numEl  = document.getElementById('thirtyone-num');
+    const circEl = document.getElementById('thirtyone-circle');
+    const isSlideScene = numEl && circEl &&
+      (numEl.style.transform === 'translateX(0px)' || numEl.style.transform === 'translateX(0)');
+
+    if (isSlideScene) {
+      numEl.style.transition  = 'transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease';
+      circEl.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease';
+      numEl.style.transform   = 'translateX(-140px)';
+      numEl.style.opacity     = '0';
+      circEl.style.transform  = 'translateX(140px)';
+      circEl.style.opacity    = '0';
+      if (currentBeat < chapter.length - 1) { currentBeat++; }
+      else if (currentChapter < TOTAL_CHAPTERS - 1) { currentChapter++; currentBeat = 0; }
+      else return;
+      setTimeout(() => renderBeat(), 360);
+      return;
+    }
+
     if (currentBeat < chapter.length - 1) {
       currentBeat++;
     } else if (currentChapter < TOTAL_CHAPTERS - 1) {
       currentChapter++;
       currentBeat = 0;
     } else {
-      // End of presentation
-      closePresentation();
       return;
     }
     renderBeat();
+  }
+
+  function presGoBack() {
+    presDirection = -1;
+    if (currentBeat > 0) {
+      currentBeat--;
+    } else if (currentChapter > 0) {
+      currentChapter--;
+      currentBeat = CHAPTERS[currentChapter].length - 1;
+    } else {
+      return;
+    }
+
+    // If the current scene has slide-in elements, animate them out first
+    const numEl  = document.getElementById('thirtyone-num') || document.getElementById('seven-num');
+    const circEl = document.getElementById('thirtyone-circle') || document.getElementById('seven-circle');
+    const isSlideScene = numEl && circEl &&
+      (numEl.style.transform === 'translateX(0px)' || numEl.style.transform === 'translateX(0)');
+
+    if (isSlideScene) {
+      numEl.style.transition  = 'transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease';
+      circEl.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease';
+      numEl.style.transform   = 'translateX(-140px)';
+      numEl.style.opacity     = '0';
+      circEl.style.transform  = 'translateX(140px)';
+      circEl.style.opacity    = '0';
+      setTimeout(() => renderBeat(), 360);
+    } else {
+      renderBeat();
+    }
+  }
+
+  // ── Week/Month panel builder (back-nav fallback) ─────────────
+  // Renders a static fully-built panel at the given stage
+  function wmPanelFull(stage) {
+    const ff = "'Work Sans',sans-serif", fs = '2.6rem', fw = '700', numW = '3.5rem';
+    const slashImg = (id, file) =>
+      `<img id="${id}" src="assets/${file}" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;width:130%;pointer-events:none;">`;
+    return `
+      <div class="scene-graphic-static" id="wm-wrap">
+        <div style="display:inline-flex;flex-direction:column;gap:0.5rem;padding:0.5rem 1rem;">
+          <div style="display:flex;align-items:baseline;gap:2.5rem;">
+            <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;min-width:6rem;">Week</span>
+            <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;width:${numW};text-align:right;">7</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:2.5rem;">
+            <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;min-width:6rem;">Month</span>
+            <span style="position:relative;width:${numW};text-align:right;">
+              <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;">31</span>
+              ${stage >= 1 ? slashImg('slash1','slash1_red.png') : ''}
+            </span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:2.5rem;${stage < 1 ? 'opacity:0;' : ''}" id="wm-row-30">
+            <span style="min-width:6rem;"></span>
+            <span style="position:relative;width:${numW};text-align:right;">
+              <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;">30</span>
+              ${stage >= 2 ? slashImg('slash2','slash2_red.png') : '<img id="slash2" src="assets/slash2_red.png" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;width:130%;pointer-events:none;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">'}
+            </span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:2.5rem;${stage < 2 ? 'opacity:0;' : ''}" id="wm-row-28">
+            <span style="min-width:6rem;"></span>
+            <span style="position:relative;width:${numW};text-align:right;">
+              <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;">28</span>
+              ${stage >= 3 ? slashImg('slash3','slash3_red.png') : '<img id="slash3" src="assets/slash3_red.png" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;width:130%;pointer-events:none;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">'}
+            </span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:2.5rem;${stage < 3 ? 'opacity:0;' : ''}" id="wm-row-29">
+            <span style="min-width:6rem;"></span>
+            <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;width:${numW};text-align:right;">29</span>
+          </div>
+        </div>
+      </div>
+      <div id="wm-caption" class="scene-body">${
+        stage === 1 ? 'Not to mention having some months that are shorter…' :
+        stage === 2 ? "and one that's really short…" :
+        'but also sometimes longer.'
+      }</div>`;
+  }
+  // All rows are always present. Invisible ones have opacity:0.
+  // stage: 0=only 31 visible, 1=31 struck+30 visible, 2=30 struck+28 visible, 3=28 struck+29 visible
+  function wmPanel(stage) {
+    const ff = "'Work Sans',sans-serif";
+    const fs = '2.4rem';
+    const fw = '700';
+    const numStyle = `font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;min-width:2.5rem;text-align:right;position:relative;display:inline-block;`;
+    const labelStyle = `font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;min-width:5.5rem;`;
+    const rowStyle = `display:flex;justify-content:center;align-items:baseline;gap:3rem;`;
+
+    const slashImg = (id, file, animate) =>
+      `<img ${id ? `id="${id}"` : ''} src="assets/${file}" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;width:120%;pointer-events:none;${animate ? 'clip-path:inset(0 100% 0 0);transition:clip-path 0.35s cubic-bezier(0.4,0,0.2,1);' : ''}">`;
+
+    // 31 row — always visible, struck from stage 1 onward
+    const row31 = `<div style="${rowStyle}">
+      <span style="${labelStyle}">Month</span>
+      <span style="${numStyle}">31${
+        stage === 1 ? slashImg('slash1','slash1_red.png',true) :
+        stage >= 2  ? slashImg('','slash1_red.png',false) : ''
+      }</span>
+    </div>`;
+
+    // 30 row — invisible before stage 1, struck from stage 2
+    const row30 = `<div style="${rowStyle};opacity:${stage >= 1 ? 1 : 0};">
+      <span style="${labelStyle}"></span>
+      <span style="${numStyle}">30${
+        stage === 2 ? slashImg('slash2','slash2_red.png',true) :
+        stage >= 3  ? slashImg('','slash2_red.png',false) : ''
+      }</span>
+    </div>`;
+
+    // 28 row — invisible before stage 2, struck from stage 3
+    const row28 = `<div style="${rowStyle};opacity:${stage >= 2 ? 1 : 0};">
+      <span style="${labelStyle}"></span>
+      <span style="${numStyle}">28${
+        stage === 3 ? slashImg('slash3','slash3_red.png',true) : ''
+      }</span>
+    </div>`;
+
+    // 29 row — invisible before stage 3
+    const row29 = `<div style="${rowStyle};opacity:${stage >= 3 ? 1 : 0};">
+      <span style="${labelStyle}"></span>
+      <span style="${numStyle}">29</span>
+    </div>`;
+
+    const weekRow = `<div style="${rowStyle};margin-bottom:0.8rem;">
+      <span style="${labelStyle}">Week</span>
+      <span style="${numStyle}">7</span>
+    </div>`;
+
+    return `<div style="display:flex;flex-direction:column;gap:0.5rem;padding:0.5rem 0;">
+      ${weekRow}${row31}${row30}${row28}${row29}
+    </div>`;
+  }
+  // Draws a wobbly, variable-weight marker slash across a number in the SVG.
+  // Multiple overlapping lines at slight angle/position offsets simulate real marker feel.
+  function wmSlash(svg, x1, y1, x2, y2) {
+    const strokes = [
+      { dx1:  0,   dy1:  1,   dx2:  0,   dy2: -1,   w: 2.5, op: 0.7 },
+      { dx1:  1,   dy1:  0,   dx2: -1,   dy2:  0,   w: 5,   op: 0.9 },
+      { dx1: -0.5, dy1:  1.5, dx2:  0.5, dy2: -1.5, w: 7,   op: 1.0 },
+      { dx1:  0.5, dy1: -1,   dx2: -0.5, dy2:  1,   w: 4,   op: 0.8 },
+      { dx1:  1.5, dy1:  0.5, dx2: -1.5, dy2: -0.5, w: 2,   op: 0.6 },
+    ];
+    const len = Math.hypot(x2 - x1, y2 - y1);
+    strokes.forEach(s => {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x1 + s.dx1); line.setAttribute('y1', y1 + s.dy1);
+      line.setAttribute('x2', x2 + s.dx2); line.setAttribute('y2', y2 + s.dy2);
+      line.setAttribute('stroke', '#cc3333');
+      line.setAttribute('stroke-width', s.w);
+      line.setAttribute('stroke-linecap', 'round');
+      line.setAttribute('opacity', s.op);
+      line.setAttribute('stroke-dasharray', len + 10);
+      line.style.strokeDashoffset = len + 10;
+      line.style.transition = 'stroke-dashoffset 0.35s cubic-bezier(0.4,0,0.2,1)';
+      svg.appendChild(line);
+    });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      svg.querySelectorAll('line').forEach(l => { l.style.strokeDashoffset = 0; });
+    }));
+  }
+
+  // Same but fully drawn immediately — for slashes that persist from a previous beat
+  function wmSlashStatic(svg, x1, y1, x2, y2) {
+    const strokes = [
+      { dx1:  0,   dy1:  1,   dx2:  0,   dy2: -1,   w: 2.5, op: 0.7 },
+      { dx1:  1,   dy1:  0,   dx2: -1,   dy2:  0,   w: 5,   op: 0.9 },
+      { dx1: -0.5, dy1:  1.5, dx2:  0.5, dy2: -1.5, w: 7,   op: 1.0 },
+      { dx1:  0.5, dy1: -1,   dx2: -0.5, dy2:  1,   w: 4,   op: 0.8 },
+      { dx1:  1.5, dy1:  0.5, dx2: -1.5, dy2: -0.5, w: 2,   op: 0.6 },
+    ];
+    strokes.forEach(s => {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x1 + s.dx1); line.setAttribute('y1', y1 + s.dy1);
+      line.setAttribute('x2', x2 + s.dx2); line.setAttribute('y2', y2 + s.dy2);
+      line.setAttribute('stroke', '#cc3333');
+      line.setAttribute('stroke-width', s.w);
+      line.setAttribute('stroke-linecap', 'round');
+      line.setAttribute('opacity', s.op);
+      svg.appendChild(line);
+    });
   }
 
   function drawProgressPie() {
@@ -1456,7 +2118,8 @@
         overlay.style.opacity    = '1';
       });
       renderBeat();
-      document.getElementById('pres-screen').addEventListener('click', advanceBeat);
+      presFirstBeat = true;
+      presNavFwdVisible = false;
       document.getElementById('pres-pie-wrap').addEventListener('click', pieGoBack);
     }, 520);
   }
