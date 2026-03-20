@@ -328,12 +328,43 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 1.5rem 1.25rem 1rem;
+    padding: 1.5rem 1.25rem 0;
     position: relative;
     overflow: hidden;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Graphic zone: fills available space, anchors content to center vertically */
+  .scene {
+    flex: 1;
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    position: relative;
+  }
+
+  /* Title-only beats anchor from a fixed vertical position so adding a second
+     title element doesn't shift the first one */
+  .scene.scene-text-only {
+    justify-content: flex-start;
+    padding-top: 20%;
+  }
+
+  /* Caption zone: fixed height, sits below graphic zone, never moves content above */
+  .pres-caption-zone {
+    width: 100%;
+    max-width: 420px;
+    height: 7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    flex-shrink: 0;
   }
 
   .pres-footer {
@@ -383,14 +414,6 @@
   }
 
   /* ── Scene elements ───────────────────────────────────────── */
-  .scene {
-    width: 100%;
-    max-width: 420px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.25rem;
-  }
 
   .scene-title {
     font-size: clamp(1.4rem, 5vw, 2rem);
@@ -1316,66 +1339,55 @@
       // slash images absolutely positioned over each number.
       // All numbers white. Slashes revealed via clip-path animation.
 
-      // Beat 7: render the full panel once. All numbers present, 30/28/29 invisible.
+      // Beat 7: render the full panel once. Grid layout, all numbers pre-placed.
       (scene) => {
-        const ff = "'Work Sans',sans-serif";
-        const fs = '2.6rem';
-        const fw = '700';
-        const numW = '3.5rem';
         scene.innerHTML = `
           <div class="scene-graphic" id="wm-wrap">
-            <div style="display:inline-flex;flex-direction:column;gap:0.5rem;padding:0.5rem 1rem;">
-              <div style="display:flex;align-items:baseline;gap:2.5rem;">
-                <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;min-width:6rem;">Week</span>
-                <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;width:${numW};text-align:right;">7</span>
-              </div>
-              <div style="display:flex;align-items:baseline;gap:2.5rem;">
-                <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;min-width:6rem;">Month</span>
-                <span style="position:relative;width:${numW};text-align:right;">
-                  <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;" id="wm-31">31</span>
-                  <img id="slash1" src="assets/slash1_red.png" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;width:130%;pointer-events:none;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
-                </span>
-              </div>
-              <div style="display:flex;align-items:baseline;gap:2.5rem;opacity:0;transition:opacity 0.3s ease;" id="wm-row-30">
-                <span style="min-width:6rem;"></span>
-                <span style="position:relative;width:${numW};text-align:right;">
-                  <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;">30</span>
-                  <img id="slash2" src="assets/slash2_red.png" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;width:130%;pointer-events:none;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
-                </span>
-              </div>
-              <div style="display:flex;align-items:baseline;gap:2.5rem;opacity:0;transition:opacity 0.3s ease;" id="wm-row-28">
-                <span style="min-width:6rem;"></span>
-                <span style="position:relative;width:${numW};text-align:right;">
-                  <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;">28</span>
-                  <img id="slash3" src="assets/slash3_red.png" style="display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;width:130%;pointer-events:none;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
-                </span>
-              </div>
-              <div style="display:flex;align-items:baseline;gap:2.5rem;opacity:0;transition:opacity 0.3s ease;" id="wm-row-29">
-                <span style="min-width:6rem;"></span>
-                <span style="font-family:${ff};font-size:${fs};font-weight:${fw};color:#fff;width:${numW};text-align:right;">29</span>
-              </div>
+            <div id="wm-grid" style="
+              display:grid;
+              grid-template-columns:auto auto;
+              column-gap:2rem;
+              row-gap:0.15rem;
+              font-family:'Work Sans',sans-serif;
+              font-size:2.6rem;
+              font-weight:700;
+              color:#fff;
+              position:relative;
+            ">
+              <span>Week</span>  <span style="text-align:left;">7</span>
+              <span>Month</span> <span style="text-align:left;position:relative;" id="wm-n31">31</span>
+              <span></span>      <span style="text-align:left;opacity:0;transition:opacity 0.25s ease;" id="wm-row-30"><span id="wm-n30">30</span></span>
+              <span></span>      <span style="text-align:left;opacity:0;transition:opacity 0.25s ease;" id="wm-row-28"><span id="wm-n28">28</span></span>
+              <span></span>      <span style="text-align:left;opacity:0;transition:opacity 0.25s ease;" id="wm-row-29"><span id="wm-n29">29</span></span>
+            </div>
+            <!-- Slash overlay: absolutely positioned over the grid, z-index above text -->
+            <div id="wm-slashes" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;">
+              <img id="slash1" src="assets/slash1_red.png" style="display:none;position:absolute;mix-blend-mode:screen;width:9rem;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
+              <img id="slash2" src="assets/slash2_red.png" style="display:none;position:absolute;mix-blend-mode:screen;width:8rem;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
+              <img id="slash3" src="assets/slash3_red.png" style="display:none;position:absolute;mix-blend-mode:screen;width:8rem;clip-path:inset(0 100% 0 0);transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);">
             </div>
           </div>
           <div id="wm-caption" class="scene-body">Using prime numbers makes all our lives just a little bit harder.</div>
         `;
         animate(scene);
+
+        // After render, position slash images over their target numbers
+        requestAnimationFrame(() => requestAnimationFrame(() => positionSlashes()));
       },
 
-      // Beat 8: show 30, animate slash over 31 — no HTML rebuild
+      // Beat 8: show 30, animate slash over 31
       (scene) => {
-        // If panel already exists (forward nav), mutate it
         const existing = document.getElementById('wm-wrap');
         if (existing) {
           document.getElementById('wm-row-30').style.opacity = '1';
+          positionSlashes();
           const s1 = document.getElementById('slash1');
           if (s1) { s1.style.display = 'block'; requestAnimationFrame(() => requestAnimationFrame(() => { s1.style.clipPath = 'inset(0 0% 0 0)'; })); }
-          const cap = document.getElementById('wm-caption');
-          if (cap) { cap.style.opacity = '0'; cap.style.transform = 'translateY(12px)'; requestAnimationFrame(() => requestAnimationFrame(() => { cap.style.transition = 'opacity 1.4s cubic-bezier(0.25,0,0.1,1) 0.3s, transform 1.4s cubic-bezier(0.25,0,0.1,1) 0.3s'; cap.textContent = 'Not to mention having some months that are shorter…'; cap.style.opacity = '1'; cap.style.transform = 'translateY(0)'; })); }
+          const zone = document.getElementById('caption-zone'); if (zone) { const nb = document.createElement('div'); nb.className = 'scene-body'; nb.textContent = 'Not to mention some months are shorter than others.'; zone.innerHTML = ''; zone.appendChild(nb); requestAnimationFrame(() => requestAnimationFrame(() => nb.classList.add('visible'))); }
         } else {
-          // Arriving via back nav — rebuild and show stage 1
           scene.innerHTML = wmPanelFull(1);
           animateCaption(scene);
-          requestAnimationFrame(() => requestAnimationFrame(() => { const s = document.getElementById('slash1'); if (s) { s.style.display='block'; s.style.clipPath='inset(0 0% 0 0)'; } }));
+          requestAnimationFrame(() => requestAnimationFrame(() => { positionSlashes(); const s = document.getElementById('slash1'); if (s) { s.style.display='block'; s.style.clipPath='inset(0 0% 0 0)'; } }));
         }
       },
 
@@ -1384,14 +1396,14 @@
         const existing = document.getElementById('wm-wrap');
         if (existing) {
           document.getElementById('wm-row-28').style.opacity = '1';
+          positionSlashes();
           const s2 = document.getElementById('slash2');
           if (s2) { s2.style.display = 'block'; requestAnimationFrame(() => requestAnimationFrame(() => { s2.style.clipPath = 'inset(0 0% 0 0)'; })); }
-          const cap = document.getElementById('wm-caption');
-          if (cap) { cap.style.opacity = '0'; cap.style.transform = 'translateY(12px)'; requestAnimationFrame(() => requestAnimationFrame(() => { cap.style.transition = 'opacity 1.4s cubic-bezier(0.25,0,0.1,1) 0.3s, transform 1.4s cubic-bezier(0.25,0,0.1,1) 0.3s'; cap.textContent = "and one that's really short…"; cap.style.opacity = '1'; cap.style.transform = 'translateY(0)'; })); }
+          const zone = document.getElementById('caption-zone'); if (zone) { const nb = document.createElement('div'); nb.className = 'scene-body'; nb.textContent = 'And one is extra short…'; zone.innerHTML = ''; zone.appendChild(nb); requestAnimationFrame(() => requestAnimationFrame(() => nb.classList.add('visible'))); }
         } else {
           scene.innerHTML = wmPanelFull(2);
           animateCaption(scene);
-          requestAnimationFrame(() => requestAnimationFrame(() => { const s = document.getElementById('slash2'); if (s) { s.style.display='block'; s.style.clipPath='inset(0 0% 0 0)'; } }));
+          requestAnimationFrame(() => requestAnimationFrame(() => { positionSlashes(); const s = document.getElementById('slash2'); if (s) { s.style.display='block'; s.style.clipPath='inset(0 0% 0 0)'; } }));
         }
       },
 
@@ -1400,14 +1412,68 @@
         const existing = document.getElementById('wm-wrap');
         if (existing) {
           document.getElementById('wm-row-29').style.opacity = '1';
+          positionSlashes();
           const s3 = document.getElementById('slash3');
           if (s3) { s3.style.display = 'block'; requestAnimationFrame(() => requestAnimationFrame(() => { s3.style.clipPath = 'inset(0 0% 0 0)'; })); }
-          const cap = document.getElementById('wm-caption');
-          if (cap) { cap.style.opacity = '0'; cap.style.transform = 'translateY(12px)'; requestAnimationFrame(() => requestAnimationFrame(() => { cap.style.transition = 'opacity 1.4s cubic-bezier(0.25,0,0.1,1) 0.3s, transform 1.4s cubic-bezier(0.25,0,0.1,1) 0.3s'; cap.textContent = 'but also sometimes longer.'; cap.style.opacity = '1'; cap.style.transform = 'translateY(0)'; })); }
+          const zone = document.getElementById('caption-zone'); if (zone) { const nb = document.createElement('div'); nb.className = 'scene-body'; nb.textContent = 'but also sometimes longer.'; zone.innerHTML = ''; zone.appendChild(nb); requestAnimationFrame(() => requestAnimationFrame(() => nb.classList.add('visible'))); }
         } else {
           scene.innerHTML = wmPanelFull(3);
           animateCaption(scene);
-          requestAnimationFrame(() => requestAnimationFrame(() => { const s = document.getElementById('slash3'); if (s) { s.style.display='block'; s.style.clipPath='inset(0 0% 0 0)'; } }));
+          requestAnimationFrame(() => requestAnimationFrame(() => { positionSlashes(); const s = document.getElementById('slash3'); if (s) { s.style.display='block'; s.style.clipPath='inset(0 0% 0 0)'; } }));
+        }
+      },
+
+      // Beat 11: week doesn't fit into a month graphic + text
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/week-month-fit.png" alt="Week doesn't fit into month" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">We all just accept that a week doesn't fit into a standard month,</div>
+        `;
+        animate(scene);
+      },
+
+      // Beat 12: month doesn't fit into year graphic + text
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/month-year-fit.png" alt="Month doesn't fit into year" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">and a month doesn't fit evenly into a year.</div>
+        `;
+        animate(scene);
+      },
+
+      // Beat 13: first sentence only — big bold title style, top-anchored
+      (scene) => {
+        scene.classList.add('scene-text-only');
+        scene.innerHTML = `
+          <div class="scene-title" id="title-13a">There's no particular reason it has to be that way.</div>
+        `;
+        animate(scene);
+      },
+
+      // Beat 14: append second sentence — first stays exactly in place
+      (scene) => {
+        const existing = document.getElementById('title-13a');
+        if (existing) {
+          const second = document.createElement('div');
+          second.className = 'scene-title';
+          second.id = 'title-13b';
+          second.textContent = "That's just how it's always been.";
+          second.style.marginTop = '1.5rem';
+          existing.parentNode.appendChild(second);
+          requestAnimationFrame(() => requestAnimationFrame(() => second.classList.add('visible')));
+        } else {
+          scene.classList.add('scene-text-only');
+          scene.innerHTML = `
+            <div class="scene-title visible" id="title-13a">There's no particular reason it has to be that way.</div>
+            <div class="scene-title" id="title-13b" style="margin-top:1.5rem;">That's just how it's always been.</div>
+          `;
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            document.getElementById('title-13b').classList.add('visible');
+          }));
         }
       },
 
@@ -1714,44 +1780,49 @@
   let currentBeat    = 0;
 
   function animate(scene) {
+    const body = scene.querySelector('.scene-body');
+    const zone = document.getElementById('caption-zone');
+    if (body && zone) { zone.innerHTML = ''; zone.appendChild(body); }
     requestAnimationFrame(() => {
-      scene.querySelectorAll('.scene-title, .scene-body, .scene-graphic').forEach(el => {
+      scene.querySelectorAll('.scene-title, .scene-graphic').forEach(el => {
         requestAnimationFrame(() => el.classList.add('visible'));
       });
-      const hint = scene.querySelector('.tap-hint');
-      if (hint) hint.classList.add('visible');
+      if (zone) zone.querySelectorAll('.scene-body').forEach(el => {
+        requestAnimationFrame(() => el.classList.add('visible'));
+      });
     });
   }
 
-  // For beats where the graphic persists — only fade in the caption text
+  // For beats where the graphic persists — only update and fade in the caption
   function animateCaption(scene) {
+    const body = scene.querySelector('.scene-body');
+    const zone = document.getElementById('caption-zone');
+    if (body && zone) { zone.innerHTML = ''; zone.appendChild(body); }
     requestAnimationFrame(() => {
-      scene.querySelectorAll('.scene-title, .scene-body').forEach(el => {
+      if (zone) zone.querySelectorAll('.scene-body').forEach(el => {
         requestAnimationFrame(() => el.classList.add('visible'));
       });
     });
   }
 
   function renderBeat() {
-    // If the Week/Month panel exists and the next beat is within the same panel group,
-    // don't wipe the screen — let the beat function mutate the existing DOM instead.
     const wmExists = document.getElementById('wm-wrap');
-    const wmBeats = new Set([7,8,9,10]); // chapter 1 beat indices (0-based: 7,8,9,10 = index 7-10)
+    const wmBeats = new Set([7,8,9,10]);
     const isWmBeat = currentChapter === 0 && wmBeats.has(currentBeat);
 
-    if (!(wmExists && isWmBeat)) {
+    const titleExists = document.getElementById('title-13a');
+    const isTitleBeat = currentChapter === 0 && currentBeat === 13;
+
+    if (!(wmExists && isWmBeat) && !(titleExists && isTitleBeat)) {
       const screen = document.getElementById('pres-screen');
-      screen.innerHTML = '<div class="scene" id="current-scene"></div><div class="tap-hint" style="display:none;"></div>';
+      screen.innerHTML = '<div class="scene" id="current-scene"></div><div class="pres-caption-zone" id="caption-zone"></div>';
     }
 
     const scene = document.getElementById('current-scene') || document.querySelector('.scene');
     CHAPTERS[currentChapter][currentBeat](scene);
     drawProgressPie();
-
-    // Back arrow
     updateBackArrow();
 
-    // Forward arrow
     if (isLastBeat()) {
       hideFwdArrow(true);
     } else {
@@ -1878,7 +1949,23 @@
     }
   }
 
-  // ── Week/Month panel builder (back-nav fallback) ─────────────
+  // Positions slash images over their target number elements by reading live DOM rects
+  function positionSlashes() {
+    const wrap = document.getElementById('wm-wrap');
+    if (!wrap) return;
+    const wrapRect = wrap.getBoundingClientRect();
+    [['slash1','wm-n31'],['slash2','wm-n30'],['slash3','wm-n28']].forEach(([slashId, numId]) => {
+      const slash = document.getElementById(slashId);
+      const num   = document.getElementById(numId);
+      if (!slash || !num) return;
+      const r = num.getBoundingClientRect();
+      const cx = r.left - wrapRect.left + r.width  / 2;
+      const cy = r.top  - wrapRect.top  + r.height / 2;
+      const w  = parseFloat(slash.style.width) * 16; // rem→px approx
+      slash.style.left = (cx - w / 2) + 'px';
+      slash.style.top  = (cy - w * 0.35) + 'px'; // slashes are wider than tall
+    });
+  }
   // Renders a static fully-built panel at the given stage
   function wmPanelFull(stage) {
     const ff = "'Work Sans',sans-serif", fs = '2.6rem', fw = '700', numW = '3.5rem';
@@ -1919,8 +2006,8 @@
         </div>
       </div>
       <div id="wm-caption" class="scene-body">${
-        stage === 1 ? 'Not to mention having some months that are shorter…' :
-        stage === 2 ? "and one that's really short…" :
+        stage === 1 ? 'Not to mention some months are shorter than others.' :
+        stage === 2 ? 'And one is extra short…' :
         'but also sometimes longer.'
       }</div>`;
   }
@@ -2039,16 +2126,31 @@
 
     if (completedChapters === 0) {
       wrap.style.pointerEvents = 'none';
+      wrap.style.transform = 'translate(60px, 60px)';
+      wrap.style.opacity = '0';
       return;
+    }
+
+    // Slide in from bottom-right the first time the pie appears
+    const wasHidden = wrap.style.opacity === '0' || wrap.style.transform === 'translate(60px, 60px)';
+    if (wasHidden) {
+      wrap.style.transition = 'none';
+      wrap.style.transform = 'translate(60px, 60px)';
+      wrap.style.opacity = '0';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        wrap.style.transition = 'transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s ease';
+        wrap.style.transform = 'translate(0,0)';
+        wrap.style.opacity = '1';
+      }));
     }
 
     wrap.style.pointerEvents = 'auto';
 
-    // Ghost circle
+    // Background circle (white, low opacity) — always visible when pie is shown
     const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     ghost.setAttribute('cx', cx); ghost.setAttribute('cy', cy); ghost.setAttribute('r', r);
-    ghost.setAttribute('fill', 'none');
-    ghost.setAttribute('stroke', '#2a6090');
+    ghost.setAttribute('fill', 'rgba(255,255,255,0.25)');
+    ghost.setAttribute('stroke', 'rgba(255,255,255,0.5)');
     ghost.setAttribute('stroke-width', '1');
     svg.appendChild(ghost);
 
