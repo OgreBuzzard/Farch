@@ -574,7 +574,7 @@
     <select id="bd-month" style="
       font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:700;
       background:rgba(255,255,255,0.1);border:1.5px solid var(--rule);border-radius:10px;
-      color:var(--white);padding:0.5rem 0.75rem;cursor:pointer;
+      color:var(--orange);padding:0.5rem 0.75rem;cursor:pointer;
       -webkit-appearance:none;appearance:none;text-align:center;
     ">
       <option value="">Month</option>
@@ -591,10 +591,10 @@
       <select id="bd-day" style="
         font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:700;
         background:rgba(255,255,255,0.1);border:1.5px solid var(--rule);border-radius:10px;
-        color:var(--white);padding:0.5rem 0.75rem;cursor:pointer;
+        color:var(--orange);padding:0.5rem 0.75rem;cursor:pointer;
         -webkit-appearance:none;appearance:none;text-align:center;min-width:4.5rem;
       ">
-        <option value="">Day</option>
+        <option value="">Date</option>
       </select>
     </div>
   </div>
@@ -1229,7 +1229,7 @@
               </svg>
             </div>
           </div>
-          <div id="seven-caption" class="scene-body">It can't be split in <span class="scene-highlight">half</span>.</div>
+          <div id="seven-caption" class="scene-body">You can't do something for half a week without splitting a day.</div>
         `;
         animateCaption(scene);
 
@@ -1284,7 +1284,7 @@
               </svg>
             </div>
           </div>
-          <div id="seven-caption" class="scene-body">Or into <span class="scene-highlight">thirds</span>.</div>
+          <div id="seven-caption" class="scene-body">A third of a week? Total mess.</div>
         `;
         animateCaption(scene);
 
@@ -1362,7 +1362,7 @@
                 </svg>
               </div>
             </div>
-            <div id="seven-caption" class="scene-body">Only <span class="scene-highlight">sevenths</span>.</div>
+            <div id="seven-caption" class="scene-body">Of all the one-digit numbers we could've settled on, <span class="scene-highlight">7</span> is the least useful.</div>
           `;
           animate(scene);
           requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -1398,7 +1398,7 @@
                 </svg>
               </div>
             </div>
-            <div id="seven-caption" class="scene-body">Only <span class="scene-highlight">sevenths</span>.</div>
+            <div id="seven-caption" class="scene-body">Of all the one-digit numbers we could've settled on, <span class="scene-highlight">7</span> is the least useful.</div>
           `;
           animateCaption(scene);
 
@@ -1570,7 +1570,7 @@
         scene.innerHTML = `
           <div class="scene-graphic" id="wm-anim-wrap">
             <video id="wm-video" autoplay muted playsinline
-              style="height:min(340px,45vh);width:auto;display:block;border-radius:4px;background:#1a4a6e;"
+              style="height:min(340px,45vh);width:auto;display:block;border-radius:4px;mix-blend-mode:screen;"
               src="assets/Week_Month_Blocks.webm"
               type="video/webm">
             </video>
@@ -1585,7 +1585,7 @@
         scene.innerHTML = `
           <div class="scene-graphic" id="my-anim-wrap">
             <video id="my-video" autoplay muted playsinline
-              style="height:min(340px,45vh);width:auto;display:block;border-radius:4px;"
+              style="height:min(340px,45vh);width:auto;display:block;border-radius:4px;mix-blend-mode:screen;"
               src="assets/Month_Year_Blocks.webm"
               type="video/webm">
             </video>
@@ -2738,6 +2738,7 @@
   }
   // ── Birthday Intro ───────────────────────────────────────────
   let birthdayGreg = null; // stores the user's Greg birthday Date for converter default
+  const bdTimers = [];     // stores pending timeout IDs so they can be cancelled
 
   function bdUpdateDays() {
     const monthSel = document.getElementById('bd-month');
@@ -2853,19 +2854,23 @@
     resultScreen.style.pointerEvents = 'auto';
     resultScreen.style.opacity = '1';
 
+    // Store timeout IDs so enterApp can cancel them
+    bdTimers.forEach(t => clearTimeout(t));
+    bdTimers.length = 0;
+
     // Label fades in after 1.0s delay
-    setTimeout(() => {
+    bdTimers.push(setTimeout(() => {
       const label = document.getElementById('bd-result-label');
       label.style.opacity = '1';
 
       // Shake loops until date appears
-      setTimeout(() => {
+      bdTimers.push(setTimeout(() => {
         label.classList.add('bd-shake');
-      }, 1100);
-    }, 1000);
+      }, 1100));
+    }, 1000));
 
     // Date fades in 3.0s after label appears (4.0s total)
-    setTimeout(() => {
+    bdTimers.push(setTimeout(() => {
       const dateEl = document.getElementById('bd-result-date');
       const label  = document.getElementById('bd-result-label');
       dateEl.textContent = farchStr;
@@ -2878,26 +2883,35 @@
       bdConfetti();
 
       // Cupcake slides up
-      setTimeout(() => {
+      bdTimers.push(setTimeout(() => {
         const cake = document.getElementById('bd-cupcake');
         cake.style.opacity = '1';
         cake.style.transform = 'translateY(0)';
-      }, 400);
-    }, 4000);
+      }, 400));
+    }, 4000));
 
     // CTA button slides up 2.5s after date appears
-    setTimeout(() => {
+    bdTimers.push(setTimeout(() => {
       const cta = document.getElementById('bd-cta');
       cta.style.opacity   = '1';
       cta.style.transform = 'translateY(0)';
-    }, 6500);
+    }, 6500));
   }
 
   function enterApp() {
-    // Slide down CTA, fade result screen
+    // Cancel any pending birthday timers
+    bdTimers.forEach(t => clearTimeout(t));
+    bdTimers.length = 0;
+
+    // Disable CTA immediately to prevent double-tap
     const cta = document.getElementById('bd-cta');
+    cta.style.pointerEvents = 'none';
     cta.style.opacity   = '0';
     cta.style.transform = 'translateY(2rem)';
+
+    // Stop shake if still running
+    const label = document.getElementById('bd-result-label');
+    if (label) label.classList.remove('bd-shake');
 
     setTimeout(() => {
       const resultScreen = document.getElementById('birthday-result');
