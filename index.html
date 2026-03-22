@@ -482,9 +482,18 @@
   }
 
   /* For persistent graphics that should not fade in/out between beats */
-  .cal-cell.today > span {
-    color: #4cd137;
+  #bd-month, #bd-day {
+    color: var(--orange);
+  }
+  #bd-month option, #bd-day option {
+    color: var(--white);
+    background: var(--bg);
+  }
+    color: #1e7a0e;
     font-weight: 900;
+  }
+  .cal-cell.highlighted.today > span {
+    color: #1e7a0e;
   }
 
   /* ── Presentation nav arrows (above footer) ──────────────── */
@@ -1562,7 +1571,7 @@
           <div class="scene-graphic" id="wm-anim-wrap">
             <video id="wm-video" autoplay muted playsinline
               style="height:min(340px,45vh);width:auto;display:block;border-radius:4px;background:#1a4a6e;"
-              src="assets/week-month.webm"
+              src="assets/Week_Month_Blocks.webm"
               type="video/webm">
             </video>
           </div>
@@ -1571,11 +1580,15 @@
         animate(scene);
       },
 
-      // Beat 12: month doesn't fit into year graphic + text
+      // Beat 12: month doesn't fit into year — video
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-graphic">
-            <img src="assets/pres/month-year-fit.png" alt="Month doesn't fit into year" style="max-width:300px;width:100%;">
+          <div class="scene-graphic" id="my-anim-wrap">
+            <video id="my-video" autoplay muted playsinline
+              style="height:min(340px,45vh);width:auto;display:block;border-radius:4px;"
+              src="assets/Month_Year_Blocks.webm"
+              type="video/webm">
+            </video>
           </div>
           <div class="scene-body">and a month doesn't fit evenly into a year.</div>
         `;
