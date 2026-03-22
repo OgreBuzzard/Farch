@@ -649,7 +649,7 @@
 
   <button id="bd-cta" onclick="enterApp()" class="why-farch-btn" style="
     margin-top:2rem;
-    opacity:0;transform:translateY(2rem);
+    opacity:0;transform:translateY(2rem);pointer-events:none;
     transition:opacity 0.5s ease,transform 0.5s cubic-bezier(0.4,0,0.2,1);
   ">My What Now?</button>
 </div>
@@ -2829,6 +2829,10 @@
     const d = parseInt(document.getElementById('bd-day').value);
     if (isNaN(m) || isNaN(d)) return;
 
+    // Prevent re-triggering if result screen already visible
+    const resultScreen = document.getElementById('birthday-result');
+    if (resultScreen.style.opacity === '1') return;
+
     const now = new Date();
     const yr  = now.getFullYear();
     const gregDate = new Date(Date.UTC(yr, m, d));
@@ -2848,7 +2852,6 @@
     introScreen.style.pointerEvents = 'none';
 
     // Fade in result screen
-    const resultScreen = document.getElementById('birthday-result');
     resultScreen.style.pointerEvents = 'auto';
     resultScreen.style.opacity = '1';
 
@@ -2891,8 +2894,9 @@
     // CTA button slides up 2.5s after date appears
     bdTimers.push(setTimeout(() => {
       const cta = document.getElementById('bd-cta');
-      cta.style.opacity   = '1';
-      cta.style.transform = 'translateY(0)';
+      cta.style.opacity      = '1';
+      cta.style.transform    = 'translateY(0)';
+      cta.style.pointerEvents = 'auto';
     }, 6500));
   }
 
