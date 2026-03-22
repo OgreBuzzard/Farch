@@ -563,7 +563,7 @@
 ">
   <div id="bd-question" style="
     font-family:'Nunito',sans-serif;font-size:clamp(2rem,7vw,2.8rem);font-weight:900;
-    color:var(--orange);text-align:center;margin-bottom:1.8rem;
+    color:var(--white);text-align:center;margin-bottom:1.8rem;
     opacity:0;transform:translateY(20px);transition:opacity 1.4s ease,transform 1.4s ease;
   ">What's your birthday?</div>
 
@@ -575,7 +575,7 @@
       font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:700;
       background:rgba(255,255,255,0.1);border:1.5px solid var(--rule);border-radius:10px;
       color:var(--orange);padding:0.5rem 0.75rem;cursor:pointer;
-      -webkit-appearance:none;appearance:none;text-align:center;
+      -webkit-appearance:none;appearance:none;text-align:center;text-align-last:center;
     ">
       <option value="">Month</option>
       <option value="0">January</option><option value="1">February</option>
@@ -2295,16 +2295,14 @@
     presDirection = 1;
     const chapter = CHAPTERS[currentChapter];
 
-    // Animate out the Week/Month video if leaving beat 11 (index 10)
+    // Cut directly from Week/Month video to Month/Year video — no fade, hold last frame
     const wmAnim = document.getElementById('wm-anim-wrap');
     const leavingWmAnim = wmAnim && currentChapter === 0 && currentBeat === 10;
     if (leavingWmAnim) {
-      const vid = document.getElementById('wm-video');
-      if (vid) { vid.style.transition = 'opacity 0.3s ease'; vid.style.opacity = '0'; }
       if (currentBeat < chapter.length - 1) { currentBeat++; }
       else if (currentChapter < TOTAL_CHAPTERS - 1) { currentChapter++; currentBeat = 0; }
       else return;
-      setTimeout(() => renderBeat(), 350);
+      renderBeat();
       return;
     }
 
