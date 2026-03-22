@@ -251,7 +251,8 @@
   #anim-month-next,
   #anim-day-prev,
   #anim-day-next,
-  #anim-why-farch {
+  #anim-why-farch,
+  #share-btn {
     transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
                 opacity 0.45s ease;
     will-change: transform, opacity;
@@ -266,6 +267,7 @@
   #anim-day-prev.exit-left    { transform: translateX(-130%); opacity: 0; }
   #anim-day-next.exit-right   { transform: translateX(130%);  opacity: 0; }
   #anim-why-farch.exit-down   { transform: translateY(130%);  opacity: 0; }
+  #share-btn.exit-down        { transform: translateY(130%);  opacity: 0; }
 
   /* ── Why Farch button ─────────────────────────────────────── */
   .why-farch-row {
@@ -293,6 +295,22 @@
     touch-action: manipulation;
   }
   .why-farch-btn:hover { background: rgba(245,166,35,0.1); }
+
+  @keyframes bdShake {
+    0%,100% { transform: translateX(0) rotate(0deg); }
+    10%      { transform: translateX(-5px) rotate(-1.2deg); }
+    20%      { transform: translateX(5px) rotate(1.2deg); }
+    30%      { transform: translateX(-4px) rotate(-0.8deg); }
+    40%      { transform: translateX(4px) rotate(0.8deg); }
+    50%      { transform: translateX(-3px) rotate(-0.5deg); }
+    60%      { transform: translateX(3px) rotate(0.5deg); }
+    70%      { transform: translateX(-2px) rotate(-0.3deg); }
+    80%      { transform: translateX(2px) rotate(0.3deg); }
+    90%      { transform: translateX(-1px) rotate(-0.1deg); }
+  }
+  .bd-shake {
+    animation: bdShake 0.7s cubic-bezier(0.36,0.07,0.19,0.97) infinite;
+  }
 
   /* Prevent text selection on all interactive elements */
   button {
@@ -464,8 +482,9 @@
   }
 
   /* For persistent graphics that should not fade in/out between beats */
-  .scene-graphic-static {
-    opacity: 1;
+  .cal-cell.today > span {
+    color: #4cd137;
+    font-weight: 900;
   }
 
   /* ── Presentation nav arrows (above footer) ──────────────── */
@@ -525,6 +544,107 @@
 </style>
 </head>
 <body>
+
+<!-- ── Birthday Intro Screen ─────────────────────────────────── -->
+<div id="birthday-screen" style="
+  position:fixed;inset:0;background:var(--bg);z-index:200;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:2rem 1.5rem;
+  transition:opacity 0.5s ease;
+">
+  <div id="bd-question" style="
+    font-family:'Nunito',sans-serif;font-size:clamp(2rem,7vw,2.8rem);font-weight:900;
+    color:var(--orange);text-align:center;margin-bottom:1.8rem;
+    opacity:0;transform:translateY(20px);transition:opacity 1.4s ease,transform 1.4s ease;
+  ">What's your birthday?</div>
+
+  <div id="bd-month-wrap" style="
+    opacity:0;transform:translateX(-60px);transition:opacity 0.7s ease,transform 0.7s cubic-bezier(0.4,0,0.2,1);
+    display:flex;gap:0.75rem;align-items:center;
+  ">
+    <select id="bd-month" style="
+      font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:700;
+      background:rgba(255,255,255,0.1);border:1.5px solid var(--rule);border-radius:10px;
+      color:var(--white);padding:0.5rem 0.75rem;cursor:pointer;
+      -webkit-appearance:none;appearance:none;text-align:center;
+    ">
+      <option value="">Month</option>
+      <option value="0">January</option><option value="1">February</option>
+      <option value="2">March</option><option value="3">April</option>
+      <option value="4">May</option><option value="5">June</option>
+      <option value="6">July</option><option value="7">August</option>
+      <option value="8">September</option><option value="9">October</option>
+      <option value="10">November</option><option value="11">December</option>
+    </select>
+    <div id="bd-day-wrap" style="
+      opacity:0;transform:translateX(60px);transition:opacity 0.7s ease,transform 0.7s cubic-bezier(0.4,0,0.2,1);
+    ">
+      <select id="bd-day" style="
+        font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:700;
+        background:rgba(255,255,255,0.1);border:1.5px solid var(--rule);border-radius:10px;
+        color:var(--white);padding:0.5rem 0.75rem;cursor:pointer;
+        -webkit-appearance:none;appearance:none;text-align:center;min-width:4.5rem;
+      ">
+        <option value="">Day</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="bd-disclaimer" style="
+    font-family:'Nunito',sans-serif;font-size:clamp(1rem,3.5vw,1.2rem);font-weight:700;
+    color:var(--white);text-align:center;margin-top:1.8rem;max-width:320px;
+    opacity:0;transition:opacity 1.0s ease;
+  ">(Don't worry. I'm not collecting your data. Go ahead and lie to me, if you like.)</div>
+
+  <button id="bd-arrow" onclick="submitBirthday()" style="
+    margin-top:1.8rem;
+    background:transparent;border:2px solid var(--orange);border-radius:14px;
+    color:var(--orange);font-size:1.6rem;font-weight:900;
+    padding:0.6rem 1.4rem;cursor:pointer;
+    opacity:0;transform:translateX(3rem);
+    transition:opacity 0.5s ease,transform 0.5s cubic-bezier(0.4,0,0.2,1),background 0.2s;
+    -webkit-tap-highlight-color:transparent;
+  ">&#8594;</button>
+</div>
+
+<!-- ── Birthday Result Screen ─────────────────────────────────── -->
+<div id="birthday-result" style="
+  position:fixed;inset:0;background:var(--bg);z-index:199;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:2rem 1.5rem;pointer-events:none;opacity:0;
+  transition:opacity 0.5s ease;
+">
+  <div id="bd-result-label" style="
+    font-family:'Nunito',sans-serif;font-size:clamp(1.5rem,5vw,2rem);font-weight:900;
+    color:var(--white);text-align:center;margin-bottom:0.5rem;
+    opacity:0;transition:opacity 1.0s ease;
+  ">And your Farch birthday is</div>
+
+  <!-- Fixed-height container so the label never moves when date fades in -->
+  <div style="position:relative;height:4.5rem;display:flex;align-items:center;justify-content:center;">
+    <canvas id="bd-confetti" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;width:320px;height:120px;" width="640" height="240"></canvas>
+    <div id="bd-result-date" style="
+      font-family:'Nunito',sans-serif;font-size:clamp(2.2rem,9vw,3.2rem);font-weight:900;
+      color:var(--orange);text-align:center;position:relative;z-index:1;
+      opacity:0;transition:opacity 1.0s ease;
+    "></div>
+  </div>
+
+  <!-- Cupcake slides up after date appears -->
+  <div id="bd-cupcake" style="
+    font-size:3.5rem;text-align:center;
+    opacity:0;transform:translateY(3rem);
+    transition:opacity 0.6s ease,transform 0.6s cubic-bezier(0.4,0,0.2,1);
+    margin-top:0.25rem;
+  ">🎂</div>
+
+  <button id="bd-cta" onclick="enterApp()" class="why-farch-btn" style="
+    margin-top:2rem;
+    opacity:0;transform:translateY(2rem);
+    transition:opacity 0.5s ease,transform 0.5s cubic-bezier(0.4,0,0.2,1);
+  ">My What Now?</button>
+</div>
+
 <div class="container">
 
   <!-- TOP: Converter box — stays fixed -->
@@ -590,8 +710,16 @@
     </div>
 
     <!-- Why Farch entry point -->
-    <div class="why-farch-row" id="anim-why-farch">
+    <div class="why-farch-row" id="anim-why-farch" style="flex-direction:column;align-items:center;gap:0.4rem;">
       <button class="why-farch-btn" onclick="openPresentation()">Why Farch?</button>
+      <button id="share-btn" onclick="shareFarch()" style="
+        background:transparent;border:none;
+        color:var(--muted);font-family:'Nunito',sans-serif;font-size:0.85rem;font-weight:700;
+        letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;
+        -webkit-tap-highlight-color:transparent;
+        margin-top:0.6rem;
+        display:none;
+      ">Share</button>
     </div>
 
   </div><!-- /.container-bottom -->
@@ -786,7 +914,8 @@
     for (let d = 1; d <= daysInMonth; d++) {
       const cell = document.createElement('div');
       const isHighlighted = d === highlightDay;
-      cell.className = 'cal-cell' + (isHighlighted ? ' highlighted' : '');
+      const isToday = isTodayGreg(y, m, d);
+      cell.className = 'cal-cell' + (isHighlighted ? ' highlighted' : '') + (isToday ? ' today' : '');
       const icon = gregHoliday(y, m, d);
       cell.innerHTML = icon ? holidayImg(icon) : `<span>${d}</span>`;
       const day = d;
@@ -812,7 +941,8 @@
       for (let i = 1; i <= maxDays; i++) {
         const cell = document.createElement('div');
         const isHighlighted = i === result.day;
-        cell.className = 'cal-cell' + (isHighlighted ? ' highlighted' : '');
+        const isToday = isTodayFarch(farchYear, 13, i);
+        cell.className = 'cal-cell' + (isHighlighted ? ' highlighted' : '') + (isToday ? ' today' : '');
         const icon = farchHoliday(13, i, farchYear);
         if (icon) {
           cell.innerHTML = holidayImg(icon);
@@ -849,7 +979,8 @@
       for (let d = 1; d <= 30; d++) {
         const cell = document.createElement('div');
         const isHighlighted = d === result.day;
-        cell.className = 'cal-cell' + (isHighlighted ? ' highlighted' : '');
+        const isToday = isTodayFarch(farchYear, result.month, d);
+        cell.className = 'cal-cell' + (isHighlighted ? ' highlighted' : '') + (isToday ? ' today' : '');
         const icon = farchHoliday(fMonth, d, farchYear);
         cell.innerHTML = icon ? holidayImg(icon) : `<span>${d}</span>`;
         const dayNum = d;
@@ -1430,7 +1561,7 @@
         scene.innerHTML = `
           <div class="scene-graphic" id="wm-anim-wrap">
             <video id="wm-video" autoplay muted playsinline
-              style="width:min(260px,70vw);display:block;border-radius:4px;"
+              style="height:min(340px,45vh);width:auto;display:block;border-radius:4px;background:#1a4a6e;"
               src="assets/week-month.webm"
               type="video/webm">
             </video>
@@ -1517,107 +1648,351 @@
           }));
         }
       },
-    ],
 
+      // Beat 3: Tyr/Mars graphic — first caption
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/tyr-mars-tuesday.png" alt="Tyr and Mars" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">Tuesday is named after a Norse God of War who's mostly been forgotten.</div>
+        `;
+        animate(scene);
+      },
 
-    // ── Chapter 3: Months ────────────────────────────────────────
-    // Pie slice 2
-    [
-      // Beat 1: old month lengths
+      // Beat 4: Tyr/Mars graphic — second caption
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/tyr-mars-tuesday.png" alt="Tyr and Mars" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">We've already got a whole month named after a war god.</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 5: Tyr/Mars graphic — third caption
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/tyr-mars-tuesday.png" alt="Tyr and Mars" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">War doesn't need a day of the week too.</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 6: Tyr/Mars graphic — punchline
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/tyr-mars-tuesday.png" alt="Tyr and Mars" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">So let's shed a <span class="scene-highlight">Tyr</span> and say goodbye to Tuesday.</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 7: six-day week intro — new graphic fades in
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic">
-            <img src="assets/pres/old-month-lengths.png" alt="Old irregular month lengths" style="max-width:280px;width:100%;">
+            <img src="assets/pres/six-day-pairs.png" alt="Six day week" style="max-width:300px;width:100%;">
           </div>
+          <div class="scene-body">With the week cut down to six days…</div>
         `;
         animate(scene);
       },
-      // Beat 2: new month lengths — all 30
+
+      // Beat 8: halves
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/six-day-pairs.png" alt="Six day week" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">…it's easy to split into <span class="scene-highlight">halves</span>…</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 9: thirds
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/six-day-pairs.png" alt="Six day week" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">…or <span class="scene-highlight">thirds</span>.</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 10: things easier
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/six-day-pairs.png" alt="Six day week" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">Which instantly makes so many things easier.</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // ── Weeks + Months ───────────────────────────────────────────
+      // Beat 1: all months 30 days
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic">
-            <img src="assets/pres/new-month-lengths.png" alt="All months 30 days" style="max-width:280px;width:100%;">
+            <img src="assets/pres/month-30.png" alt="All months 30 days" style="max-width:300px;width:100%;">
           </div>
-          <div class="scene-body">Every month is <span class="scene-highlight">30</span> days. No exceptions. No rhyme required.</div>
+          <div class="scene-body">As for months: they're all now <span class="scene-highlight">30</span> days long.</div>
         `;
         animate(scene);
       },
-      // Beat 3: 5-week month grid
+
+      // Beat 2: 5 weeks per month
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic">
-            <img src="assets/pres/five-week-month.png" alt="5-week month grid" style="max-width:300px;width:100%;">
+            <img src="assets/pres/five-week-month.png" alt="5 weeks in a month" style="max-width:300px;width:100%;">
           </div>
-          <div class="scene-body"><span class="scene-highlight">5</span> weeks per month. Every time.</div>
+          <div class="scene-body">With 6-day weeks, you get exactly <span class="scene-highlight">5 weeks</span> in each month…</div>
         `;
         animate(scene);
       },
-      // Beat 4: 60 weeks × 6 days = 360
-      (scene) => {
-        scene.innerHTML = `
-          <div class="scene-graphic" style="padding:1rem 0;">
-            <div style="font-family:'Nunito',sans-serif;font-size:clamp(1.4rem,5vw,2rem);font-weight:900;color:var(--white);text-align:center;letter-spacing:0.02em;">
-              60 WEEKS × 6 DAYS = <span style="color:var(--orange)">360</span>
-            </div>
-          </div>
-          <div class="scene-body">60 weeks in a year — the same as the tick marks on a clock face. The weeks in a year are like the seconds in a minute.</div>
-        `;
-        animate(scene);
-      },
-      // Beat 5: full year grid with week numbers
+
+      // Beat 3: 60 weeks per year
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic">
-            <img src="assets/pres/full-year-grid.png" alt="Full Farch year with week numbers" style="max-width:360px;width:100%;">
+            <img src="assets/pres/sixty-weeks.png" alt="60 weeks in a year" style="max-width:300px;width:100%;">
           </div>
+          <div class="scene-body">…and exactly <span class="scene-highlight">60 weeks</span> in each year.</div>
         `;
         animate(scene);
+      },
+
+      // Beat 4: clock face
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/sixty-weeks.png" alt="60 weeks in a year" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">That's the same number of tick marks on a clock face.</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 5: weeks = seconds
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/sixty-weeks.png" alt="60 weeks in a year" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">So now the weeks in a year are like the seconds in a minute…</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 6: …and the minutes in an hour
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/sixty-weeks.png" alt="60 weeks in a year" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">…and the minutes in an hour.</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 7: weeks into months
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/weeks-into-months.png" alt="Weeks stacking into months" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">Weeks now stack neatly into months…</div>
+        `;
+        animate(scene);
+      },
+
+      // Beat 8: months into years
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/weeks-into-months.png" alt="Weeks stacking into months" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">…and months now stack neatly into years.</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 9: everything is tidy
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/weeks-into-months.png" alt="Weeks stacking into months" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">Everything is nice and tidy.</div>
+        `;
+        animateCaption(scene);
       },
     ],
 
     // ── Chapter 4: Farch ─────────────────────────────────────────
     // Pie slice 3
     [
-      // Beat 1: Earth + Sun + (actually 365.2422)
+      // Beat 1: but wait
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-title">But wait…</div>
+        `;
+        animate(scene);
+      },
+
+      // Beat 2: 60×6=360
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic">
             <img src="assets/pres/earth-orbit.png" alt="Earth orbiting sun" style="max-width:320px;width:100%;">
           </div>
-          <div class="scene-body">60 × 6 = 360. But Earth takes <span class="scene-highlight">365.2422</span> days to orbit the sun. We're 5 days short.</div>
+          <div class="scene-body">60 weeks of 6 days each is <span class="scene-highlight">360</span>…</div>
         `;
         animate(scene);
       },
-      // Beat 2: Farch introduced
+
+      // Beat 3: earth takes 365
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/earth-orbit.png" alt="Earth orbiting sun" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">…and it takes the earth <span class="scene-highlight">365</span> days to go around the sun.</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 4: it doesn't quite fit
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/earth-orbit.png" alt="Earth orbiting sun" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">It doesn't quite fit.</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 5: so what do we do
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/earth-orbit.png" alt="Earth orbiting sun" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">So what do we do?</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 6: 5-day mini-month
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic">
             <img src="assets/pres/farch-intro.png" alt="Farch mini-month" style="max-width:320px;width:100%;">
           </div>
-          <div class="scene-body">The leftover days become <span class="scene-highlight">Farch</span> — a 5-day mini-month at the end of the year. No work. No school. That weird week when nothing happens anyway? Now it has a name.</div>
+          <div class="scene-body">We add an extra <span class="scene-highlight">5-day mini-month</span> at the end, called…</div>
         `;
         animate(scene);
       },
-      // Beat 3: Farch lifestyle
+
+      // Beat 7: Farch
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/farch-intro.png" alt="Farch mini-month" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body"><span class="scene-highlight">Farch.</span></div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 8: no one works on Farch
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic">
-            <img src="assets/pres/farch-lifestyle.png" alt="Family walk, bed" style="max-width:320px;width:100%;">
+            <img src="assets/pres/farch-lifestyle.png" alt="Farch" style="max-width:320px;width:100%;">
           </div>
+          <div class="scene-body">No one works on Farch.</div>
         `;
         animate(scene);
       },
-      // Beat 4: leap year
+
+      // Beat 9: offices and schools closed
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-graphic">
-            <img src="assets/pres/leap-farch.png" alt="Farch and Leap Farch grids" style="max-width:320px;width:100%;">
+          <div class="scene-graphic-static">
+            <img src="assets/pres/farch-lifestyle.png" alt="Farch" style="max-width:320px;width:100%;">
           </div>
-          <div class="scene-body">Leap year: Farch gets a <span class="scene-highlight">6th day</span>. The extra day moves out of February and into Farch, where it belongs.</div>
+          <div class="scene-body">Offices and schools are closed.</div>
         `;
-        animate(scene);
+        animateCaption(scene);
+      },
+
+      // Beat 10: visit family
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/farch-lifestyle.png" alt="Farch" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">It's a break from normal time to visit family…</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 11: take long walks
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/farch-lifestyle.png" alt="Farch" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">…take long walks…</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 12: hide from civilization
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/farch-lifestyle.png" alt="Farch" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">…or just stay in bed and hide from the collapse of civilization.</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 13: we already have that weird week
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/farch-lifestyle.png" alt="Farch" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">We already have that weird week at the end of the year when no one does anything.</div>
+        `;
+        animateCaption(scene);
+      },
+
+      // Beat 14: now it has a name
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic-static">
+            <img src="assets/pres/farch-lifestyle.png" alt="Farch" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">Now it has a name.</div>
+        `;
+        animateCaption(scene);
       },
     ],
+
 
     // ── Chapter 5: Holidays ──────────────────────────────────────
     // Pie slice 4
@@ -2348,10 +2723,302 @@
     slices.push(`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#93bcd8" stroke-width="1.5" opacity="0.4"/>`);
     return slices.join('');
   }
+  // ── Birthday Intro ───────────────────────────────────────────
+  let birthdayGreg = null; // stores the user's Greg birthday Date for converter default
+
+  function bdUpdateDays() {
+    const monthSel = document.getElementById('bd-month');
+    const daySel   = document.getElementById('bd-day');
+    const m = parseInt(monthSel.value);
+    const prevDay = daySel.value;
+    // Build day options for selected month (use a non-leap year for Feb)
+    const maxDay = isNaN(m) ? 31 : new Date(Date.UTC(2001, m + 1, 0)).getUTCDate();
+    daySel.innerHTML = '<option value="">Day</option>';
+    for (let d = 1; d <= maxDay; d++) {
+      const opt = document.createElement('option');
+      opt.value = d; opt.textContent = d;
+      daySel.appendChild(opt);
+    }
+    if (prevDay && parseInt(prevDay) <= maxDay) daySel.value = prevDay;
+    bdCheckReady();
+  }
+
+  function bdCheckReady() {
+    const m = document.getElementById('bd-month').value;
+    const d = document.getElementById('bd-day').value;
+    const arrow = document.getElementById('bd-arrow');
+    if (m !== '' && d !== '') {
+      arrow.style.opacity = '1';
+      arrow.style.transform = 'translateX(0)';
+      arrow.style.pointerEvents = 'auto';
+    } else {
+      arrow.style.opacity = '0';
+      arrow.style.transform = 'translateX(3rem)';
+      arrow.style.pointerEvents = 'none';
+    }
+  }
+
+  function bdConfetti() {
+    const canvas = document.getElementById('bd-confetti');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const cx = W / 2, cy = H / 2;
+    const colors = ['#f5a623','#f5a623','#f5a623','#ffffff','#ffd580'];
+
+    const particles = Array.from({length: 48}, (_, i) => {
+      const side = i % 2 === 0 ? -1 : 1;
+      const angle = (Math.random() * 0.9 + 0.05) * Math.PI; // mostly sideways
+      const speed = 3 + Math.random() * 5;
+      return {
+        x: cx + side * (Math.random() * 20),
+        y: cy,
+        vx: side * Math.cos(angle) * speed,
+        vy: -(Math.sin(angle) * speed + Math.random() * 2),
+        r: 3 + Math.random() * 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: 1,
+        gravity: 0.18 + Math.random() * 0.1,
+      };
+    });
+
+    let frame;
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      let alive = false;
+      particles.forEach(p => {
+        p.x  += p.vx;
+        p.y  += p.vy;
+        p.vy += p.gravity;
+        p.vx *= 0.98;
+        p.alpha -= 0.018;
+        if (p.alpha <= 0) return;
+        alive = true;
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      if (alive) frame = requestAnimationFrame(draw);
+    }
+    draw();
+  }
+
+  function ordinal(n) {
+    const s = ['th','st','nd','rd'];
+    const v = n % 100;
+    return n + (s[(v-20)%10] || s[v] || s[0]);
+  }
+
+  function submitBirthday() {
+    const m = parseInt(document.getElementById('bd-month').value);
+    const d = parseInt(document.getElementById('bd-day').value);
+    if (isNaN(m) || isNaN(d)) return;
+
+    const now = new Date();
+    const yr  = now.getFullYear();
+    const gregDate = new Date(Date.UTC(yr, m, d));
+    birthdayGreg = gregDate;
+
+    const farchResult = gregorianToFarch(gregDate);
+    let farchStr;
+    if (farchResult.isFarch) {
+      farchStr = `Farch ${ordinal(farchResult.day)}`;
+    } else {
+      farchStr = `${FARCH_MONTHS[farchResult.month]} ${ordinal(farchResult.day)}`;
+    }
+
+    // Fade out intro screen
+    const introScreen = document.getElementById('birthday-screen');
+    introScreen.style.opacity = '0';
+    introScreen.style.pointerEvents = 'none';
+
+    // Fade in result screen
+    const resultScreen = document.getElementById('birthday-result');
+    resultScreen.style.pointerEvents = 'auto';
+    resultScreen.style.opacity = '1';
+
+    // Label fades in after 1.0s delay
+    setTimeout(() => {
+      const label = document.getElementById('bd-result-label');
+      label.style.opacity = '1';
+
+      // Shake loops until date appears
+      setTimeout(() => {
+        label.classList.add('bd-shake');
+      }, 1100);
+    }, 1000);
+
+    // Date fades in 3.0s after label appears (4.0s total)
+    setTimeout(() => {
+      const dateEl = document.getElementById('bd-result-date');
+      const label  = document.getElementById('bd-result-label');
+      dateEl.textContent = farchStr;
+      dateEl.style.opacity = '1';
+
+      // Stop shake
+      label.classList.remove('bd-shake');
+
+      // Fire confetti
+      bdConfetti();
+
+      // Cupcake slides up
+      setTimeout(() => {
+        const cake = document.getElementById('bd-cupcake');
+        cake.style.opacity = '1';
+        cake.style.transform = 'translateY(0)';
+      }, 400);
+    }, 4000);
+
+    // CTA button slides up 2.5s after date appears
+    setTimeout(() => {
+      const cta = document.getElementById('bd-cta');
+      cta.style.opacity   = '1';
+      cta.style.transform = 'translateY(0)';
+    }, 6500);
+  }
+
+  function enterApp() {
+    // Slide down CTA, fade result screen
+    const cta = document.getElementById('bd-cta');
+    cta.style.opacity   = '0';
+    cta.style.transform = 'translateY(2rem)';
+
+    setTimeout(() => {
+      const resultScreen = document.getElementById('birthday-result');
+      resultScreen.style.opacity = '0';
+      resultScreen.style.pointerEvents = 'none';
+      setTimeout(() => { resultScreen.style.display = 'none'; }, 500);
+    }, 200);
+
+    // Trigger main app curtain-in — defaulting to birthday if set
+    const now   = new Date();
+    const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    const startDate = birthdayGreg || today;
+
+    // Run the curtain animation
+    curtainIn(startDate);
+  }
+
+  function curtainIn(startDate) {
+    const convEl   = document.getElementById('anim-converter');
+    const leftEl   = document.getElementById('anim-left');
+    const rightEl  = document.getElementById('anim-right');
+    const mPrev    = document.getElementById('anim-month-prev');
+    const mNext    = document.getElementById('anim-month-next');
+    const dPrev    = document.getElementById('anim-day-prev');
+    const dNext    = document.getElementById('anim-day-next');
+    const whyEl    = document.getElementById('anim-why-farch');
+    const shareEl  = document.getElementById('share-btn');
+    const allEls   = [convEl, leftEl, rightEl, mPrev, mNext, dPrev, dNext, whyEl];
+
+    // Position all elements off-screen instantly
+    allEls.forEach(el => { el.style.transition = 'none'; });
+    if (shareEl) { shareEl.style.transition = 'none'; shareEl.style.display = 'block'; }
+
+    convEl.classList.add('exit-up');
+    leftEl.classList.add('exit-left');
+    rightEl.classList.add('exit-right');
+    mPrev.classList.add('exit-left');   mNext.classList.add('exit-right');
+    dPrev.classList.add('exit-left');   dNext.classList.add('exit-right');
+    whyEl.classList.add('exit-down');
+    if (shareEl) shareEl.classList.add('exit-down');
+
+    setDate(startDate, 0);
+
+    requestAnimationFrame(() => {
+      allEls.forEach(el => { el.style.transition = ''; });
+      if (shareEl) shareEl.style.transition = '';
+
+      // 1. Converter drops from top
+      setTimeout(() => convEl.classList.remove('exit-up'), 50);
+
+      // 2. Greg calendar slides in from left (0.5s after converter lands)
+      setTimeout(() => leftEl.classList.remove('exit-left'), 600);
+
+      // 3. Farch calendar slides in from right (0.5s after Greg)
+      setTimeout(() => rightEl.classList.remove('exit-right'), 1150);
+
+      // 4. Why Farch? slides up (0.5s after calendars)
+      setTimeout(() => whyEl.classList.remove('exit-down'), 1700);
+
+      // 5. Share slides up (0.5s after Why Farch?)
+      setTimeout(() => {
+        if (shareEl) shareEl.classList.remove('exit-down');
+      }, 2250);
+
+      // 6. Day arrows slide in simultaneously from both sides (0.5s after Share)
+      setTimeout(() => {
+        dPrev.classList.remove('exit-left');
+        dNext.classList.remove('exit-right');
+      }, 2800);
+
+      // 7. Month arrows slide in simultaneously (0.5s after day arrows)
+      setTimeout(() => {
+        mPrev.classList.remove('exit-left');
+        mNext.classList.remove('exit-right');
+      }, 3350);
+    });
+  }
+
+  function shareFarch() {
+    const m = birthdayGreg ? birthdayGreg.getUTCMonth() : null;
+    const d = birthdayGreg ? birthdayGreg.getUTCDate()  : null;
+    let farchStr = '';
+    if (m !== null && d !== null) {
+      const now = new Date();
+      const gregDate = new Date(Date.UTC(now.getFullYear(), m, d));
+      const farchResult = gregorianToFarch(gregDate);
+      if (farchResult.isFarch) {
+        farchStr = `Farch ${farchResult.day}`;
+      } else {
+        farchStr = `${FARCH_MONTHS[farchResult.month]} ${farchResult.day}`;
+      }
+    }
+    const url = window.location.href.split('?')[0];
+    const text = farchStr
+      ? `My Farch birthday is ${farchStr}\n${url}`
+      : `Find out your Farch birthday:\n${url}`;
+
+    if (navigator.share) {
+      navigator.share({ text });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('share-btn');
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = orig; }, 2000);
+      });
+    }
+  }
+
+  // ── Today date highlighting ──────────────────────────────────
+  // Store today's exact date for grid highlighting
+  const _todayNow = new Date();
+  const TODAY_GREG = new Date(Date.UTC(_todayNow.getFullYear(), _todayNow.getMonth(), _todayNow.getDate()));
+  const TODAY_FARCH = gregorianToFarch(TODAY_GREG);
+
+  function isTodayGreg(y, m, d) {
+    return y === TODAY_GREG.getUTCFullYear() &&
+           m === TODAY_GREG.getUTCMonth() &&
+           d === TODAY_GREG.getUTCDate();
+  }
+
+  function isTodayFarch(farchYear, farchMonth, farchDay) {
+    return farchYear  === TODAY_FARCH.year &&
+           farchMonth === TODAY_FARCH.month &&
+           farchDay   === TODAY_FARCH.day;
+  }
+
+
   document.addEventListener('DOMContentLoaded', () => {
     const now   = new Date();
     const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
 
+    // Keep main app off-screen initially — birthday screen shows first
     const convEl  = document.getElementById('anim-converter');
     const leftEl  = document.getElementById('anim-left');
     const rightEl = document.getElementById('anim-right');
@@ -2360,37 +3027,51 @@
     const dPrev   = document.getElementById('anim-day-prev');
     const dNext   = document.getElementById('anim-day-next');
     const whyEl   = document.getElementById('anim-why-farch');
-
-    const allEls = [convEl, leftEl, rightEl, mPrev, mNext, dPrev, dNext, whyEl];
+    const allEls  = [convEl, leftEl, rightEl, mPrev, mNext, dPrev, dNext, whyEl];
 
     allEls.forEach(el => { el.style.transition = 'none'; });
-
     convEl.classList.add('exit-up');
     leftEl.classList.add('exit-left');
     rightEl.classList.add('exit-right');
-    mPrev.classList.add('exit-left');
-    mNext.classList.add('exit-right');
-    dPrev.classList.add('exit-left');
-    dNext.classList.add('exit-right');
+    mPrev.classList.add('exit-left');  mNext.classList.add('exit-right');
+    dPrev.classList.add('exit-left');  dNext.classList.add('exit-right');
     whyEl.classList.add('exit-down');
+    allEls.forEach(el => { el.style.transition = ''; });
 
+    // Pre-render calendar at today's date so it's ready
     setDate(today, 0);
 
-    requestAnimationFrame(() => {
-      allEls.forEach(el => { el.style.transition = ''; });
+    // Wire birthday selectors
+    document.getElementById('bd-month').addEventListener('change', bdUpdateDays);
+    document.getElementById('bd-day').addEventListener('change', bdCheckReady);
 
+    // Animate birthday screen in — slow, rhythmic sequence
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      // Question fades in after 0.5s delay, over 1.4s
       setTimeout(() => {
-        leftEl.classList.remove('exit-left');
-        rightEl.classList.remove('exit-right');
-        mPrev.classList.remove('exit-left');
-        mNext.classList.remove('exit-right');
-        dPrev.classList.remove('exit-left');
-        dNext.classList.remove('exit-right');
-      }, 100);
+        const q = document.getElementById('bd-question');
+        q.style.opacity = '1'; q.style.transform = 'translateY(0)';
+      }, 500);
 
-      setTimeout(() => { convEl.classList.remove('exit-up'); }, 220);
-      setTimeout(() => { whyEl.classList.remove('exit-down'); }, 340);
-    });
+      // Month selector slides in from left after 1.5s
+      setTimeout(() => {
+        const mw = document.getElementById('bd-month-wrap');
+        mw.style.opacity = '1'; mw.style.transform = 'translateX(0)';
+      }, 1500);
+
+      // Day selector slides in from right after 2.5s
+      setTimeout(() => {
+        const dw = document.getElementById('bd-day-wrap');
+        dw.style.opacity = '1'; dw.style.transform = 'translateX(0)';
+      }, 2500);
+
+      // Disclaimer after 4.0s
+      setTimeout(() => {
+        document.getElementById('bd-disclaimer').style.opacity = '1';
+      }, 4000);
+    }));
+
+
 
     // Prevent all zoom — double-tap, pinch, and gesture
     // Prevent double-tap zoom — skip buttons so rapid tapping works freely
