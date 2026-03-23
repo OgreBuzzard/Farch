@@ -595,6 +595,7 @@
         -webkit-appearance:none;appearance:none;text-align:center;min-width:4.5rem;
       ">
         <option value="">Date</option>
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option>
       </select>
     </div>
   </div>
@@ -651,6 +652,7 @@
     margin-top:2rem;
     opacity:0;transform:translateY(2rem);pointer-events:none;
     transition:opacity 0.5s ease,transform 0.5s cubic-bezier(0.4,0,0.2,1);
+    position:relative;z-index:10;
   ">My What Now?</button>
 </div>
 
@@ -1407,6 +1409,10 @@
             if (!svg) return;
             svg.querySelectorAll('.third-line').forEach(l => { l.style.strokeDashoffset = rCirc; });
             setTimeout(() => {
+              // Turn 7 orange as spokes begin
+              const sevenText = document.getElementById('seven-text');
+              if (sevenText) sevenText.style.fill = '#f5a623';
+
               for (let i = 0; i < 7; i++) {
                 const a = (i * 2*Math.PI/7) - Math.PI/2;
                 const ex = (cx + rCirc*Math.cos(a)).toFixed(3);
@@ -1422,11 +1428,6 @@
               }
               requestAnimationFrame(() => requestAnimationFrame(() => {
                 svg.querySelectorAll('line:not(.third-line)').forEach(l => { l.style.strokeDashoffset = 0; });
-                // Turn the 7 orange as spokes finish
-                setTimeout(() => {
-                  const sevenText = document.getElementById('seven-text');
-                  if (sevenText) sevenText.style.fill = '#f5a623';
-                }, 1400);
               }));
             }, 650);
           }));
@@ -1459,7 +1460,7 @@
               </svg>
             </div>
           </div>
-          <div class="scene-body">Months are even worse. They only split into <span class="scene-highlight">thirty-oneths</span>.</div>
+          <div class="scene-body">Months are even worse, unless you need to break a task into <span class="scene-highlight">thirty-oneths</span>.</div>
         `;
         animate(scene);
 
@@ -1608,19 +1609,46 @@
         });
       },
 
-      // Beat 12: month doesn't fit into year — video
+      // Beat 12: month doesn't fit into year — swap video src in-place
       (scene) => {
-        scene.innerHTML = `
-          <div class="scene-graphic" id="my-anim-wrap">
-            <video id="my-video" autoplay muted playsinline
-              style="height:min(280px,38vh);width:auto;display:block;border-radius:4px;mix-blend-mode:screen;"
-              src="assets/Month_Year_Blocks.webm"
-              type="video/webm">
-            </video>
-          </div>
-          <div class="scene-body">and a month doesn't fit evenly into a year.</div>
-        `;
-        animate(scene);
+        const existing = document.getElementById('wm-anim-wrap');
+        if (existing) {
+          // Swap the video source seamlessly
+          const vid = document.getElementById('wm-video');
+          if (vid) {
+            vid.id = 'my-video';
+            vid.src = 'assets/Month_Year_Blocks.webm';
+            vid.load();
+            vid.play();
+            vid.addEventListener('ended', () => { vid.pause(); });
+          }
+          // Update caption
+          const zone = document.getElementById('caption-zone');
+          if (zone) {
+            const nb = document.createElement('div');
+            nb.className = 'scene-body';
+            nb.textContent = "and a month doesn't fit evenly into a year.";
+            zone.innerHTML = '';
+            zone.appendChild(nb);
+            requestAnimationFrame(() => requestAnimationFrame(() => nb.classList.add('visible')));
+          }
+        } else {
+          scene.innerHTML = `
+            <div class="scene-graphic" id="wm-anim-wrap">
+              <video id="my-video" autoplay muted playsinline
+                style="height:min(280px,38vh);width:auto;display:block;border-radius:4px;mix-blend-mode:screen;"
+                src="assets/Month_Year_Blocks.webm"
+                type="video/webm">
+              </video>
+            </div>
+            <div class="scene-body">and a month doesn't fit evenly into a year.</div>
+          `;
+          animate(scene);
+          requestAnimationFrame(() => {
+            const vid = document.getElementById('my-video');
+            if (vid) vid.addEventListener('ended', () => { vid.pause(); });
+          });
+        }
       },
 
       // Beat 13: first sentence only — big bold title style, top-anchored
@@ -2241,7 +2269,7 @@
 
   function renderBeat() {
     const wmExists = document.getElementById('wm-wrap');
-    const wmBeats = new Set([7,8,9,10]);
+    const wmBeats = new Set([7,8,9,10,11]);
     const isWmBeat = currentChapter === 0 && wmBeats.has(currentBeat);
 
     const titleExists = document.getElementById('title-13a') || document.getElementById('title-ch2-a');
@@ -2345,7 +2373,11 @@
       const circEl = leavingSevenCircle
         ? document.getElementById('seven-circle')
         : document.getElementById('thirtyone-circle');
-      const slid = numEl && (numEl.style.transform === 'translateX(0px)' || numEl.style.transform === 'translateX(0)') && numEl.style.opacity !== '0';
+      const slid = numEl && numEl.style.opacity !== '0' && (
+        numEl.style.transform === 'translateX(0px)' ||
+        numEl.style.transform === 'translateX(0)' ||
+        numEl.style.transform === ''
+      );
       if (slid) {
         numEl.style.transition  = 'transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease';
         circEl.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease';
@@ -2773,7 +2805,7 @@
     const prevDay = daySel.value;
     // Build day options for selected month (use a non-leap year for Feb)
     const maxDay = isNaN(m) ? 31 : new Date(Date.UTC(2001, m + 1, 0)).getUTCDate();
-    daySel.innerHTML = '<option value="">Day</option>';
+    daySel.innerHTML = '<option value="">Date</option>';
     for (let d = 1; d <= maxDay; d++) {
       const opt = document.createElement('option');
       opt.value = d; opt.textContent = d;
