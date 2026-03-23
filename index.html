@@ -1594,9 +1594,10 @@
         scene.innerHTML = `
           <div class="scene-graphic" id="wm-anim-wrap">
             <video id="wm-video" autoplay muted playsinline
-              style="height:min(280px,38vh);width:auto;display:block;border-radius:4px;mix-blend-mode:screen;"
-              src="assets/Week_Month_Blocks.webm"
-              type="video/webm">
+              style="height:min(280px,38vh);width:auto;display:block;border-radius:4px;"
+              type="video/mp4">
+              <source src="assets/Week_Month_Blocks.mov" type='video/mp4; codecs="hvc1"'>
+              <source src="assets/Week_Month_Blocks.webm" type="video/webm">
             </video>
           </div>
           <div class="scene-body">We all just accept that a week doesn't fit into a standard month.</div>
@@ -1617,7 +1618,11 @@
           const vid = document.getElementById('wm-video');
           if (vid) {
             vid.id = 'my-video';
-            vid.src = 'assets/Month_Year_Blocks.webm';
+            // Update sources for second video
+            vid.innerHTML = `
+              <source src="assets/Month_Year_Blocks.mov" type='video/mp4; codecs="hvc1"'>
+              <source src="assets/Month_Year_Blocks.webm" type="video/webm">
+            `;
             vid.load();
             vid.play();
             vid.addEventListener('ended', () => { vid.pause(); });
@@ -1636,9 +1641,9 @@
           scene.innerHTML = `
             <div class="scene-graphic" id="wm-anim-wrap">
               <video id="my-video" autoplay muted playsinline
-                style="height:min(280px,38vh);width:auto;display:block;border-radius:4px;mix-blend-mode:screen;"
-                src="assets/Month_Year_Blocks.webm"
-                type="video/webm">
+                style="height:min(280px,38vh);width:auto;display:block;border-radius:4px;">
+                <source src="assets/Month_Year_Blocks.mov" type='video/mp4; codecs="hvc1"'>
+                <source src="assets/Month_Year_Blocks.webm" type="video/webm">
               </video>
             </div>
             <div class="scene-body">and a month doesn't fit evenly into a year.</div>
