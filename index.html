@@ -324,10 +324,6 @@
     touch-action: manipulation;
   }
 
-  * {
-    touch-action: manipulation;
-  }
-
   /* ── Presentation Overlay ─────────────────────────────────── */
   .pres-overlay {
     position: fixed;
@@ -632,7 +628,7 @@
   <div id="bd-result-label" style="
     font-family:'Nunito',sans-serif;font-size:clamp(1.5rem,5vw,2rem);font-weight:900;
     color:var(--white);text-align:center;margin-bottom:0.5rem;
-    opacity:0;transition:opacity 1.0s ease;
+    opacity:0;transition:opacity 1.0s ease;pointer-events:none;
   ">And your Farch birthday is</div>
 
   <!-- Fixed-height container so the label never moves when date fades in -->
@@ -641,7 +637,7 @@
     <div id="bd-result-date" style="
       font-family:'Nunito',sans-serif;font-size:clamp(2.2rem,9vw,3.2rem);font-weight:900;
       color:var(--orange);text-align:center;position:relative;z-index:1;
-      opacity:0;transition:opacity 1.0s ease;
+      opacity:0;transition:opacity 1.0s ease;pointer-events:none;
     "></div>
   </div>
 
@@ -653,7 +649,7 @@
     margin-top:0.25rem;pointer-events:none;
   ">🎂</div>
 
-  <button id="bd-cta" onclick="enterApp()" class="why-farch-btn" style="
+  <button id="bd-cta" class="why-farch-btn" style="
     margin-top:2rem;
     opacity:0;transform:translateY(2rem);pointer-events:none;
     transition:opacity 0.5s ease,transform 0.5s cubic-bezier(0.4,0,0.2,1);
@@ -1612,7 +1608,7 @@
               <source src="assets/Week_Month_Blocks.webm" type="video/webm">
             </video>
           </div>
-          <div class="scene-body">We all just accept that a week doesn't fit into a standard month.</div>
+          <div class="scene-body">We all just accept that a week doesn't fit into a standard month…</div>
         `;
         animateCaption(scene);
         requestAnimationFrame(() => {
@@ -1630,13 +1626,13 @@
       (scene) => {
         const existing = document.getElementById('wm-anim-wrap');
         if (existing) {
-          // Show still frame immediately to cover any gap during src swap
           const still = document.getElementById('wm-still');
-          if (still) still.style.display = 'block';
-
-          // Swap the video source
           const vid = document.getElementById('wm-video');
           if (vid) {
+            // Hide video and show still immediately to cover the load gap
+            vid.style.opacity = '0';
+            if (still) still.style.display = 'block';
+
             vid.id = 'my-video';
             vid.innerHTML = `
               <source src="assets/Months_Year_Blocks.mov" type='video/mp4; codecs="hvc1"'>
@@ -1644,8 +1640,9 @@
             `;
             vid.load();
             vid.play();
-            // Hide still frame once new video is playing
+            // Reveal video and hide still once playing
             vid.addEventListener('playing', () => {
+              vid.style.opacity = '1';
               if (still) still.style.display = 'none';
             }, { once: true });
             vid.addEventListener('ended', () => { vid.pause(); });
@@ -1655,7 +1652,7 @@
           if (zone) {
             const nb = document.createElement('div');
             nb.className = 'scene-body';
-            nb.textContent = "and a month doesn't fit evenly into a year.";
+            nb.textContent = "…and a month doesn't fit evenly into a year.";
             zone.innerHTML = '';
             zone.appendChild(nb);
             requestAnimationFrame(() => requestAnimationFrame(() => nb.classList.add('visible')));
@@ -1669,7 +1666,7 @@
                 <source src="assets/Months_Year_Blocks.webm" type="video/webm">
               </video>
             </div>
-            <div class="scene-body">and a month doesn't fit evenly into a year.</div>
+            <div class="scene-body">…and a month doesn't fit evenly into a year.</div>
           `;
           animateCaption(scene);
           requestAnimationFrame(() => {
@@ -2945,6 +2942,8 @@
     const introScreen = document.getElementById('birthday-screen');
     introScreen.style.opacity = '0';
     introScreen.style.pointerEvents = 'none';
+    // Remove from hit-testing entirely after fade completes
+    setTimeout(() => { introScreen.style.display = 'none'; }, 600);
 
     // Fade in result screen
     resultScreen.style.pointerEvents = 'auto';
@@ -2989,9 +2988,19 @@
     // CTA button slides up 2.5s after date appears
     bdTimers.push(setTimeout(() => {
       const cta = document.getElementById('bd-cta');
-      cta.style.opacity      = '1';
-      cta.style.transform    = 'translateY(0)';
+      cta.style.opacity       = '1';
+      cta.style.transform     = 'translateY(0)';
       cta.style.pointerEvents = 'auto';
+      // Wire both touchstart and click to ensure full-button tap on iOS
+      let fired = false;
+      const handler = (e) => {
+        e.preventDefault();
+        if (fired) return;
+        fired = true;
+        enterApp();
+      };
+      cta.addEventListener('touchstart', handler, { passive: false });
+      cta.addEventListener('click', handler);
     }, 6500));
   }
 
