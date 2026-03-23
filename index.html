@@ -244,7 +244,12 @@
   /* ── Curtain animation groups ─────────────────────────────── */
   .anim-left, .anim-right { flex: 1; max-width: 48%; }
 
-  #anim-converter,
+  #anim-converter {
+    transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.9s ease;
+    will-change: transform, opacity;
+  }
+
   #anim-left,
   #anim-right,
   #anim-month-prev,
@@ -631,7 +636,7 @@
   ">And your Farch birthday is</div>
 
   <!-- Fixed-height container so the label never moves when date fades in -->
-  <div style="position:relative;height:4.5rem;display:flex;align-items:center;justify-content:center;">
+  <div style="position:relative;height:4.5rem;display:flex;align-items:center;justify-content:center;pointer-events:none;">
     <canvas id="bd-confetti" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;width:320px;height:120px;" width="640" height="240"></canvas>
     <div id="bd-result-date" style="
       font-family:'Nunito',sans-serif;font-size:clamp(2.2rem,9vw,3.2rem);font-weight:900;
@@ -645,7 +650,7 @@
     font-size:3.5rem;text-align:center;
     opacity:0;transform:translateY(3rem);
     transition:opacity 0.6s ease,transform 0.6s cubic-bezier(0.4,0,0.2,1);
-    margin-top:0.25rem;
+    margin-top:0.25rem;pointer-events:none;
   ">🎂</div>
 
   <button id="bd-cta" onclick="enterApp()" class="why-farch-btn" style="
@@ -751,6 +756,12 @@
     <div class="pres-pie-wrap" id="pres-pie-wrap">
       <svg id="pres-pie-svg" viewBox="0 0 44 44"></svg>
     </div>
+    <button id="debug-jump-btn" onclick="debugJump()" style="
+      background:transparent;border:1px solid var(--rule);border-radius:6px;
+      color:var(--muted);font-family:'Nunito',sans-serif;font-size:0.65rem;
+      font-weight:800;letter-spacing:0.08em;text-transform:uppercase;
+      padding:0.3rem 0.6rem;cursor:pointer;opacity:0.4;
+    ">Jump</button>
   </div>
 </div>
 
@@ -1619,11 +1630,14 @@
       (scene) => {
         const existing = document.getElementById('wm-anim-wrap');
         if (existing) {
-          // Swap the video source seamlessly
+          // Show still frame immediately to cover any gap during src swap
+          const still = document.getElementById('wm-still');
+          if (still) still.style.display = 'block';
+
+          // Swap the video source
           const vid = document.getElementById('wm-video');
           if (vid) {
             vid.id = 'my-video';
-            // Still frame stays visible underneath during src swap
             vid.innerHTML = `
               <source src="assets/Months_Year_Blocks.mov" type='video/mp4; codecs="hvc1"'>
               <source src="assets/Months_Year_Blocks.webm" type="video/webm">
@@ -1632,7 +1646,6 @@
             vid.play();
             // Hide still frame once new video is playing
             vid.addEventListener('playing', () => {
-              const still = document.getElementById('wm-still');
               if (still) still.style.display = 'none';
             }, { once: true });
             vid.addEventListener('ended', () => { vid.pause(); });
@@ -2679,6 +2692,13 @@
     }
   }
 
+  function debugJump() {
+    // Jump to just before the video beats for easy testing
+    currentChapter = 0;
+    currentBeat = 9; // beat 10 (0-indexed) — one tap away from videos
+    renderBeat();
+  }
+
   function openPresentation() {
     currentChapter = 0;
     currentBeat    = 0;
@@ -3039,31 +3059,31 @@
       // 1. Converter drops from top
       setTimeout(() => convEl.classList.remove('exit-up'), 50);
 
-      // 2. Greg calendar slides in from left (0.5s after converter lands)
-      setTimeout(() => leftEl.classList.remove('exit-left'), 600);
+      // 2. Greg calendar slides in from left (1.0s after converter starts — extra pause to let it land)
+      setTimeout(() => leftEl.classList.remove('exit-left'), 1100);
 
       // 3. Farch calendar slides in from right (0.5s after Greg)
-      setTimeout(() => rightEl.classList.remove('exit-right'), 1150);
+      setTimeout(() => rightEl.classList.remove('exit-right'), 1650);
 
       // 4. Why Farch? slides up (0.5s after calendars)
-      setTimeout(() => whyEl.classList.remove('exit-down'), 1700);
+      setTimeout(() => whyEl.classList.remove('exit-down'), 2200);
 
       // 5. Share slides up (0.5s after Why Farch?)
       setTimeout(() => {
         if (shareEl) shareEl.classList.remove('exit-down');
-      }, 2250);
+      }, 2750);
 
       // 6. Day arrows slide in simultaneously from both sides (0.5s after Share)
       setTimeout(() => {
         dPrev.classList.remove('exit-left');
         dNext.classList.remove('exit-right');
-      }, 2800);
+      }, 3300);
 
       // 7. Month arrows slide in simultaneously (0.5s after day arrows)
       setTimeout(() => {
         mPrev.classList.remove('exit-left');
         mNext.classList.remove('exit-right');
-      }, 3350);
+      }, 3850);
     });
   }
 
