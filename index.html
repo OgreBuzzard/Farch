@@ -1592,9 +1592,10 @@
       // Beat 11: Week/Month block animation — video
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-graphic-static" id="wm-anim-wrap" style="width:100%;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;">
+          <div class="scene-graphic-static" id="wm-anim-wrap" style="width:100%;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;position:relative;">
+            <img id="wm-still" src="assets/Weeks_Month_Block.png" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);height:min(420px,57vh);width:auto;display:block;border-radius:4px;z-index:0;">
             <video id="wm-video" autoplay muted playsinline
-              style="height:min(420px,57vh);width:auto;display:block;border-radius:4px;"
+              style="height:min(420px,57vh);width:auto;display:block;border-radius:4px;position:relative;z-index:1;"
               type="video/mp4">
               <source src="assets/Week_Month_Blocks.mov" type='video/mp4; codecs="hvc1"'>
               <source src="assets/Week_Month_Blocks.webm" type="video/webm">
@@ -1618,13 +1619,18 @@
           const vid = document.getElementById('wm-video');
           if (vid) {
             vid.id = 'my-video';
-            // Update sources for second video
+            // Still frame stays visible underneath during src swap
             vid.innerHTML = `
               <source src="assets/Months_Year_Blocks.mov" type='video/mp4; codecs="hvc1"'>
               <source src="assets/Months_Year_Blocks.webm" type="video/webm">
             `;
             vid.load();
             vid.play();
+            // Hide still frame once new video is playing
+            vid.addEventListener('playing', () => {
+              const still = document.getElementById('wm-still');
+              if (still) still.style.display = 'none';
+            }, { once: true });
             vid.addEventListener('ended', () => { vid.pause(); });
           }
           // Update caption
