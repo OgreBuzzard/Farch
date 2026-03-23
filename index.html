@@ -1229,7 +1229,7 @@
               </svg>
             </div>
           </div>
-          <div id="seven-caption" class="scene-body">You can't do something for half a week without splitting a day.</div>
+          <div id="seven-caption" class="scene-body">You can't do something for <span class="scene-highlight">half</span> a week without splitting a day.</div>
         `;
         animateCaption(scene);
 
@@ -1284,7 +1284,7 @@
               </svg>
             </div>
           </div>
-          <div id="seven-caption" class="scene-body">A third of a week? Total mess.</div>
+          <div id="seven-caption" class="scene-body">A <span class="scene-highlight">third</span> of a week? Total mess.</div>
         `;
         animateCaption(scene);
 
@@ -1351,7 +1351,7 @@
             <div id="seven-wrap" class="scene-graphic" style="display:flex;align-items:center;gap:1rem;justify-content:center;overflow:hidden;padding-left:1.5rem;">
               <div id="seven-num" style="transform:translateX(-120px);opacity:0;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1),opacity 0.5s ease;">
                 <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
-                  <text xml:space="preserve" x="3.78" y="428" font-family="'Work Sans',sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
+                  <text xml:space="preserve" x="3.78" y="428" font-family="'Work Sans',sans-serif" font-size="576" font-weight="700" fill="#f5a623">7</text>
                 </svg>
               </div>
               <div id="seven-circle" style="transform:translateX(120px);opacity:0;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1),opacity 0.5s ease;">
@@ -1362,7 +1362,7 @@
                 </svg>
               </div>
             </div>
-            <div id="seven-caption" class="scene-body">Of all the one-digit numbers we could've settled on, <span class="scene-highlight">7</span> is the least useful.</div>
+            <div id="seven-caption" class="scene-body">Of all the one-digit numbers we could've settled on, we picked the least useful.</div>
           `;
           animate(scene);
           requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -1387,7 +1387,7 @@
             <div id="seven-wrap" class="scene-graphic-static" style="display:flex;align-items:center;gap:1rem;justify-content:center;padding-left:1.5rem;">
               <div id="seven-num">
                 <svg viewBox="0 0 362 457" width="80" height="101" xmlns="http://www.w3.org/2000/svg">
-                  <text xml:space="preserve" x="3.78" y="428" font-family="'Work Sans',sans-serif" font-size="576" font-weight="700" fill="#ffffff">7</text>
+                  <text id="seven-text" xml:space="preserve" x="3.78" y="428" font-family="'Work Sans',sans-serif" font-size="576" font-weight="700" fill="#ffffff" style="transition:fill 0.5s ease;">7</text>
                 </svg>
               </div>
               <div id="seven-circle">
@@ -1398,7 +1398,7 @@
                 </svg>
               </div>
             </div>
-            <div id="seven-caption" class="scene-body">Of all the one-digit numbers we could've settled on, <span class="scene-highlight">7</span> is the least useful.</div>
+            <div id="seven-caption" class="scene-body">Of all the one-digit numbers we could've settled on, we picked the least useful.</div>
           `;
           animateCaption(scene);
 
@@ -1422,6 +1422,11 @@
               }
               requestAnimationFrame(() => requestAnimationFrame(() => {
                 svg.querySelectorAll('line:not(.third-line)').forEach(l => { l.style.strokeDashoffset = 0; });
+                // Turn the 7 orange as spokes finish
+                setTimeout(() => {
+                  const sevenText = document.getElementById('seven-text');
+                  if (sevenText) sevenText.style.fill = '#f5a623';
+                }, 1400);
               }));
             }, 650);
           }));
@@ -1528,7 +1533,12 @@
         } else {
           scene.innerHTML = wmPanelFull(1);
           animateCaption(scene);
-          setTimeout(() => { positionSlashes(); const s = document.getElementById('slash1'); if (s) { s.style.display='block'; s.style.clipPath='inset(0 0% 0 0)'; } }, 50);
+          setTimeout(() => {
+            positionSlashes();
+            const s = document.getElementById('slash1');
+            if (s) { s.style.display = 'block'; s.style.clipPath = 'inset(0 0% 0 0)'; }
+            setTimeout(() => positionSlashes(), 150);
+          }, 100);
         }
       },
 
@@ -1544,7 +1554,12 @@
         } else {
           scene.innerHTML = wmPanelFull(2);
           animateCaption(scene);
-          setTimeout(() => { positionSlashes(); const s = document.getElementById('slash2'); if (s) { s.style.display='block'; s.style.clipPath='inset(0 0% 0 0)'; } }, 50);
+          setTimeout(() => {
+            positionSlashes();
+            const s = document.getElementById('slash2');
+            if (s) { s.style.display = 'block'; s.style.clipPath = 'inset(0 0% 0 0)'; }
+            setTimeout(() => positionSlashes(), 150);
+          }, 100);
         }
       },
 
@@ -1560,8 +1575,16 @@
         } else {
           scene.innerHTML = wmPanelFull(3);
           animateCaption(scene);
-          // All slashes already fully visible at stage 3 — just position them
-          setTimeout(() => { positionSlashes(); ['slash1','slash2','slash3'].forEach(id => { const s = document.getElementById(id); if (s) { s.style.display='block'; } }); }, 50);
+          // All slashes already fully visible at stage 3 — position after layout settles
+          setTimeout(() => {
+            positionSlashes();
+            ['slash1','slash2','slash3'].forEach(id => {
+              const s = document.getElementById(id);
+              if (s) { s.style.display = 'block'; }
+            });
+            // Re-position after images have loaded/rendered
+            setTimeout(() => positionSlashes(), 150);
+          }, 100);
         }
       },
 
@@ -1570,7 +1593,7 @@
         scene.innerHTML = `
           <div class="scene-graphic" id="wm-anim-wrap">
             <video id="wm-video" autoplay muted playsinline
-              style="height:min(340px,45vh);width:auto;display:block;border-radius:4px;mix-blend-mode:screen;"
+              style="height:min(280px,38vh);width:auto;display:block;border-radius:4px;mix-blend-mode:screen;"
               src="assets/Week_Month_Blocks.webm"
               type="video/webm">
             </video>
@@ -1578,6 +1601,11 @@
           <div class="scene-body">We all just accept that a week doesn't fit into a standard month.</div>
         `;
         animate(scene);
+        // Pause on last frame when video ends
+        requestAnimationFrame(() => {
+          const vid = document.getElementById('wm-video');
+          if (vid) vid.addEventListener('ended', () => { vid.pause(); });
+        });
       },
 
       // Beat 12: month doesn't fit into year — video
@@ -1585,7 +1613,7 @@
         scene.innerHTML = `
           <div class="scene-graphic" id="my-anim-wrap">
             <video id="my-video" autoplay muted playsinline
-              style="height:min(340px,45vh);width:auto;display:block;border-radius:4px;mix-blend-mode:screen;"
+              style="height:min(280px,38vh);width:auto;display:block;border-radius:4px;mix-blend-mode:screen;"
               src="assets/Month_Year_Blocks.webm"
               type="video/webm">
             </video>
