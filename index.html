@@ -1544,7 +1544,7 @@
           setTimeout(() => {
             positionSlashes();
             const s = document.getElementById('slash1');
-            if (s) { s.style.display = 'block'; s.style.clipPath = 'inset(0 0% 0 0)'; }
+            if (s) { s.style.clipPath = 'inset(0 0% 0 0)'; s.style.opacity = '1'; }
             setTimeout(() => positionSlashes(), 150);
           }, 100);
         }
@@ -1565,7 +1565,7 @@
           setTimeout(() => {
             positionSlashes();
             const s = document.getElementById('slash2');
-            if (s) { s.style.display = 'block'; s.style.clipPath = 'inset(0 0% 0 0)'; }
+            if (s) { s.style.clipPath = 'inset(0 0% 0 0)'; s.style.opacity = '1'; }
             setTimeout(() => positionSlashes(), 150);
           }, 100);
         }
@@ -1588,9 +1588,8 @@
             positionSlashes();
             ['slash1','slash2','slash3'].forEach(id => {
               const s = document.getElementById(id);
-              if (s) { s.style.display = 'block'; }
+              if (s) s.style.opacity = '1';
             });
-            // Re-position after images have loaded/rendered
             setTimeout(() => positionSlashes(), 150);
           }, 100);
         }
@@ -1720,7 +1719,7 @@
         animate(scene);
       },
 
-      // Beat 2 (ch2): append second stanza — first stays
+      // Beat 2 (ch2): append second stanza — Tuesday box fades in after 1s
       (scene) => {
         const existing = document.getElementById('title-ch2-a');
         if (existing) {
@@ -1731,60 +1730,192 @@
           second.style.marginTop = '1.5rem';
           existing.parentNode.appendChild(second);
           requestAnimationFrame(() => requestAnimationFrame(() => second.classList.add('visible')));
+          // Add Tuesday box below text
+          const tueImg = document.createElement('img');
+          tueImg.id = 'tue-box';
+          tueImg.src = 'assets/Tue.png';
+          tueImg.style.cssText = 'width:160px;margin-top:1.5rem;opacity:0;transition:opacity 0.8s ease;';
+          existing.parentNode.appendChild(tueImg);
+          // Tuesday box fades in after 1s
+          setTimeout(() => { tueImg.style.opacity = '1'; }, 1000);
         } else {
           scene.classList.add('scene-text-only');
           scene.innerHTML = `
             <div class="scene-title visible" id="title-ch2-a">So here's how we make it better:</div>
             <div class="scene-title" id="title-ch2-b" style="margin-top:1.5rem;">We're getting rid of Tuesday.</div>
+            <img id="tue-box" src="assets/Tue.png" style="width:160px;margin-top:1.5rem;opacity:0;transition:opacity 0.8s ease;">
           `;
           requestAnimationFrame(() => requestAnimationFrame(() => {
             document.getElementById('title-ch2-b').classList.add('visible');
           }));
+          setTimeout(() => {
+            const tue = document.getElementById('tue-box');
+            if (tue) tue.style.opacity = '1';
+          }, 1000);
         }
       },
 
-      // Beat 3: Tyr/Mars graphic — first caption
+      // Beat 3: text gone, Tuesday rises to center, Tyr slides in from left + name
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-graphic">
-            <img src="assets/pres/tyr-mars-tuesday.png" alt="Tyr and Mars" style="max-width:300px;width:100%;">
+          <div class="scene-graphic" id="tue-scene" style="
+            display:flex;align-items:center;justify-content:center;
+            width:100%;position:relative;min-height:220px;
+          ">
+            <div id="tyr-wrap" style="position:absolute;left:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;transform:translateX(-120%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);">
+              <img id="tyr-name" src="assets/Tyr_Name.png" style="width:90px;opacity:0;transition:opacity 0.5s ease;">
+              <img src="assets/Tyr.png" style="width:130px;">
+            </div>
+            <img id="tue-box" src="assets/Tue.png" style="width:160px;transform:translateY(50px);opacity:0;transition:transform 0.7s cubic-bezier(0.4,0,0.2,1),opacity 0.7s ease;">
+            <div id="mars-wrap" style="position:absolute;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;transform:translateX(120%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);opacity:0;">
+              <img id="mars-name" src="assets/Mars_Name.png" style="width:110px;opacity:0;transition:opacity 0.5s ease;">
+              <img src="assets/Mars_God.png" style="width:130px;">
+            </div>
           </div>
           <div class="scene-body">Tuesday is named after a Norse God of War who's mostly been forgotten.</div>
         `;
         animate(scene);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const tue = document.getElementById('tue-box');
+          if (tue) { tue.style.transform = 'translateY(0)'; tue.style.opacity = '1'; }
+          setTimeout(() => {
+            const tyr = document.getElementById('tyr-wrap');
+            if (tyr) tyr.style.transform = 'translateX(0)';
+            setTimeout(() => {
+              const tyrName = document.getElementById('tyr-name');
+              if (tyrName) tyrName.style.opacity = '1';
+            }, 500);
+          }, 300);
+        }));
       },
 
-      // Beat 4: Tyr/Mars graphic — second caption
+      // Beat 4: Mars slides in from right + name
       (scene) => {
-        scene.innerHTML = `
-          <div class="scene-graphic-static">
-            <img src="assets/pres/tyr-mars-tuesday.png" alt="Tyr and Mars" style="max-width:300px;width:100%;">
-          </div>
-          <div class="scene-body">We've already got a whole month named after a war god.</div>
-        `;
-        animateCaption(scene);
+        const existing = document.getElementById('tue-scene');
+        if (existing) {
+          const marsWrap = document.getElementById('mars-wrap');
+          if (marsWrap) {
+            marsWrap.style.transition = 'transform 0.6s cubic-bezier(0.4,0,0.2,1), opacity 0s';
+            marsWrap.style.opacity = '1';
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+              marsWrap.style.transform = 'translateX(0)';
+              setTimeout(() => {
+                const marsName = document.getElementById('mars-name');
+                if (marsName) marsName.style.opacity = '1';
+              }, 500);
+            }));
+          }
+          const zone = document.getElementById('caption-zone');
+          if (zone) {
+            const nb = document.createElement('div');
+            nb.className = 'scene-body';
+            nb.textContent = "We've already got a whole month named after a war god.";
+            zone.innerHTML = '';
+            zone.appendChild(nb);
+            requestAnimationFrame(() => requestAnimationFrame(() => nb.classList.add('visible')));
+          }
+        } else {
+          scene.innerHTML = `
+            <div class="scene-graphic-static" id="tue-scene" style="display:flex;align-items:center;justify-content:center;width:100%;position:relative;min-height:220px;">
+              <div id="tyr-wrap" style="position:absolute;left:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+                <img id="tyr-name" src="assets/Tyr_Name.png" style="width:90px;">
+                <img src="assets/Tyr.png" style="width:130px;">
+              </div>
+              <img id="tue-box" src="assets/Tue.png" style="width:160px;">
+              <div id="mars-wrap" style="position:absolute;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+                <img id="mars-name" src="assets/Mars_Name.png" style="width:110px;">
+                <img src="assets/Mars_God.png" style="width:130px;">
+              </div>
+            </div>
+            <div class="scene-body">We've already got a whole month named after a war god.</div>
+          `;
+          animateCaption(scene);
+        }
       },
 
-      // Beat 5: Tyr/Mars graphic — third caption
+      // Beat 5: War highlighted, Mars + label fade out
       (scene) => {
-        scene.innerHTML = `
-          <div class="scene-graphic-static">
-            <img src="assets/pres/tyr-mars-tuesday.png" alt="Tyr and Mars" style="max-width:300px;width:100%;">
-          </div>
-          <div class="scene-body">War doesn't need a day of the week too.</div>
-        `;
-        animateCaption(scene);
+        const existing = document.getElementById('tue-scene');
+        if (existing) {
+          const marsWrap = document.getElementById('mars-wrap');
+          if (marsWrap) { marsWrap.style.opacity = '1'; marsWrap.style.transform = 'translateX(0)'; }
+          const marsName = document.getElementById('mars-name');
+          if (marsName) marsName.style.opacity = '1';
+          const zone = document.getElementById('caption-zone');
+          if (zone) {
+            const nb = document.createElement('div');
+            nb.className = 'scene-body';
+            nb.innerHTML = '<span class="scene-highlight">War</span> doesn\'t need a day of the week too.';
+            zone.innerHTML = '';
+            zone.appendChild(nb);
+            requestAnimationFrame(() => requestAnimationFrame(() => nb.classList.add('visible')));
+          }
+          setTimeout(() => {
+            if (marsWrap) { marsWrap.style.transition = 'opacity 0.7s ease'; marsWrap.style.opacity = '0'; }
+          }, 800);
+        } else {
+          scene.innerHTML = `
+            <div class="scene-graphic-static" id="tue-scene" style="display:flex;align-items:center;justify-content:center;width:100%;position:relative;min-height:220px;">
+              <div id="tyr-wrap" style="position:absolute;left:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+                <img id="tyr-name" src="assets/Tyr_Name.png" style="width:90px;">
+                <img src="assets/Tyr.png" style="width:130px;">
+              </div>
+              <img id="tue-box" src="assets/Tue.png" style="width:160px;">
+              <div id="mars-wrap" style="position:absolute;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;opacity:0;">
+                <img id="mars-name" src="assets/Mars_Name.png" style="width:110px;">
+                <img src="assets/Mars_God.png" style="width:130px;">
+              </div>
+            </div>
+            <div class="scene-body"><span class="scene-highlight">War</span> doesn't need a day of the week too.</div>
+          `;
+          animateCaption(scene);
+        }
       },
 
-      // Beat 6: Tyr/Mars graphic — punchline
+      // Beat 6: Tyr + name fling up-left, Tuesday flings up-right — Gilliam style
       (scene) => {
-        scene.innerHTML = `
-          <div class="scene-graphic-static">
-            <img src="assets/pres/tyr-mars-tuesday.png" alt="Tyr and Mars" style="max-width:300px;width:100%;">
-          </div>
-          <div class="scene-body">So let's shed a <span class="scene-highlight">Tyr</span> and say goodbye to Tuesday.</div>
-        `;
-        animateCaption(scene);
+        const existing = document.getElementById('tue-scene');
+        if (existing) {
+          const tyrWrap = document.getElementById('tyr-wrap');
+          const tyrName = document.getElementById('tyr-name');
+          const tue     = document.getElementById('tue-box');
+          if (tyrWrap) {
+            tyrWrap.style.transition = 'transform 0.5s cubic-bezier(0.2,0,0.1,1), opacity 0.5s ease';
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+              tyrWrap.style.transform = 'translateX(-170%) translateY(-220%) rotate(-140deg)';
+              tyrWrap.style.opacity = '0';
+            }));
+          }
+          if (tyrName) {
+            tyrName.style.transition = 'transform 0.4s cubic-bezier(0.2,0,0.1,1), opacity 0.4s ease';
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+              tyrName.style.transform = 'translateX(-220%) translateY(-320%) rotate(-210deg)';
+              tyrName.style.opacity = '0';
+            }));
+          }
+          if (tue) {
+            tue.style.transition = 'transform 0.45s cubic-bezier(0.2,0,0.1,1), opacity 0.45s ease';
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+              tue.style.transform = 'translateX(190%) translateY(-260%) rotate(125deg)';
+              tue.style.opacity = '0';
+            }));
+          }
+          const zone = document.getElementById('caption-zone');
+          if (zone) {
+            const nb = document.createElement('div');
+            nb.className = 'scene-body';
+            nb.innerHTML = "So let's shed a <span class=\"scene-highlight\">Tyr</span> and say goodbye to Tuesday.";
+            zone.innerHTML = '';
+            zone.appendChild(nb);
+            requestAnimationFrame(() => requestAnimationFrame(() => nb.classList.add('visible')));
+          }
+        } else {
+          scene.innerHTML = `
+            <div class="scene-graphic" id="tue-scene" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:220px;"></div>
+            <div class="scene-body">So let's shed a <span class="scene-highlight">Tyr</span> and say goodbye to Tuesday.</div>
+          `;
+          animate(scene);
+        }
       },
 
       // Beat 7: six-day week intro — new graphic fades in
@@ -2297,11 +2428,15 @@
     const wmBeats = new Set([7,8,9,10,11]);
     const isWmBeat = currentChapter === 0 && wmBeats.has(currentBeat);
 
+    const tueExists = document.getElementById('tue-scene');
+    const tueBeats = new Set([2,3,4,5]); // ch2 beats 3-6 (0-indexed 2-5)
+    const isTueBeat = currentChapter === 1 && tueBeats.has(currentBeat);
+
     const titleExists = document.getElementById('title-13a') || document.getElementById('title-ch2-a');
     const isTitleBeat = (currentChapter === 0 && currentBeat === 13) ||
                         (currentChapter === 1 && currentBeat === 1);
 
-    if (!(wmExists && isWmBeat) && !(titleExists && isTitleBeat)) {
+    if (!(wmExists && isWmBeat) && !(titleExists && isTitleBeat) && !(tueExists && isTueBeat)) {
       const screen = document.getElementById('pres-screen');
       screen.innerHTML = '<div class="scene" id="current-scene"></div><div class="pres-caption-zone" id="caption-zone"></div>';
     }
@@ -2509,9 +2644,9 @@
           <span></span>      <span style="text-align:left;${stage < 3 ? 'opacity:0;' : ''}" id="wm-row-29"><span id="wm-n29">29</span></span>
         </div>
         <div id="wm-slashes" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;">
-          <img id="slash1" src="assets/slash1_red.png" style="${stage >= 1 ? '' : 'display:none;'}position:absolute;width:3.5rem;">
-          <img id="slash2" src="assets/slash2_red.png" style="${stage >= 2 ? '' : 'display:none;'}position:absolute;width:3.2rem;">
-          <img id="slash3" src="assets/slash3_red.png" style="${stage >= 3 ? '' : 'display:none;'}position:absolute;width:3.2rem;">
+          <img id="slash1" src="assets/slash1_red.png" style="${stage >= 1 ? '' : 'display:none;'}position:absolute;width:3.5rem;opacity:0;">
+          <img id="slash2" src="assets/slash2_red.png" style="${stage >= 2 ? '' : 'display:none;'}position:absolute;width:3.2rem;opacity:0;">
+          <img id="slash3" src="assets/slash3_red.png" style="${stage >= 3 ? '' : 'display:none;'}position:absolute;width:3.2rem;opacity:0;">
         </div>
       </div>
       <div id="wm-caption" class="scene-body">${captions[stage]}</div>`;
