@@ -1773,32 +1773,17 @@
       // Beat 3: text gone, Tuesday rises to center, Tyr slides in from left + name
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-graphic" id="tue-scene" style="
-            display:grid;
-            grid-template-columns:1fr auto 1fr;
-            grid-template-rows:auto auto;
-            align-items:end;
-            justify-items:center;
-            width:100%;gap:0.5rem;
-          ">
-            <!-- Tuesday spans full width, centered -->
-            <img id="tue-box" src="assets/Tue.png" style="
-              grid-column:1/4;grid-row:1;
-              width:min(200px,52vw);
-              transform:translateY(30px);opacity:0;
-              transition:transform 0.7s cubic-bezier(0.4,0,0.2,1),opacity 0.7s ease;
-            ">
-            <!-- Tyr -->
-            <div id="tyr-wrap" style="grid-column:1;grid-row:2;display:flex;flex-direction:column;align-items:center;gap:0.2rem;transform:translateX(-110%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);">
-              <img id="tyr-name" src="assets/Tyr_Name.png" style="width:clamp(70px,20vw,110px);opacity:0;transition:opacity 0.5s ease;">
-              <img src="assets/Tyr.png" style="width:clamp(130px,40vw,220px);">
-            </div>
-            <!-- Spacer -->
-            <div style="grid-column:2;grid-row:2;width:clamp(60px,18vw,100px);"></div>
-            <!-- Mars -->
-            <div id="mars-wrap" style="grid-column:3;grid-row:2;display:flex;flex-direction:column;align-items:center;gap:0.2rem;transform:translateX(110%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);opacity:0;">
-              <img id="mars-name" src="assets/Mars_Name.png" style="width:clamp(70px,20vw,110px);opacity:0;transition:opacity 0.5s ease;">
-              <img src="assets/Mars_God.png" style="width:clamp(130px,40vw,220px);">
+          <div class="scene-graphic" id="tue-scene" style="display:flex;flex-direction:column;align-items:center;width:100%;gap:0.5rem;">
+            <img id="tue-box" src="assets/Tue.png" style="width:min(160px,42vw);transform:translateY(30px);opacity:0;transition:transform 0.7s cubic-bezier(0.4,0,0.2,1),opacity 0.7s ease;">
+            <div style="display:flex;width:100%;align-items:flex-end;justify-content:space-around;">
+              <div id="tyr-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.2rem;transform:translateX(-110%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);">
+                <img id="tyr-name" src="assets/Tyr_Name.png" style="width:min(80px,22vw);opacity:0;transition:opacity 0.5s ease;">
+                <img src="assets/Tyr.png" style="height:min(160px,40vw);width:auto;">
+              </div>
+              <div id="mars-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.2rem;transform:translateX(110%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);opacity:0;">
+                <img id="mars-name" src="assets/Mars_Name.png" style="width:min(80px,22vw);opacity:0;transition:opacity 0.5s ease;">
+                <img src="assets/Mars_God.png" style="height:min(160px,40vw);width:auto;">
+              </div>
             </div>
           </div>
           <div class="scene-body">Tuesday is named after a Norse God of War who's mostly been forgotten.</div>
@@ -1845,16 +1830,17 @@
           }
         } else {
           scene.innerHTML = `
-            <div class="scene-graphic-static" id="tue-scene" style="display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:auto auto;align-items:end;justify-items:center;width:100%;gap:0.5rem;">
-              <img id="tue-box" src="assets/Tue.png" style="grid-column:1/4;grid-row:1;width:min(200px,52vw);">
-              <div id="tyr-wrap" style="grid-column:1;grid-row:2;display:flex;flex-direction:column;align-items:center;gap:0.2rem;">
-                <img id="tyr-name" src="assets/Tyr_Name.png" style="width:clamp(70px,20vw,110px);">
-                <img src="assets/Tyr.png" style="width:clamp(130px,40vw,220px);">
-              </div>
-              <div style="grid-column:2;grid-row:2;width:clamp(60px,18vw,100px);"></div>
-              <div id="mars-wrap" style="grid-column:3;grid-row:2;display:flex;flex-direction:column;align-items:center;gap:0.2rem;">
-                <img id="mars-name" src="assets/Mars_Name.png" style="width:clamp(70px,20vw,110px);">
-                <img src="assets/Mars_God.png" style="width:clamp(130px,40vw,220px);">
+            <div class="scene-graphic-static" id="tue-scene" style="display:flex;flex-direction:column;align-items:center;width:100%;gap:0.5rem;">
+              <img id="tue-box" src="assets/Tue.png" style="width:min(160px,42vw);">
+              <div style="display:flex;width:100%;align-items:flex-end;justify-content:space-around;">
+                <div id="tyr-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.2rem;">
+                  <img id="tyr-name" src="assets/Tyr_Name.png" style="width:min(80px,22vw);">
+                  <img src="assets/Tyr.png" style="height:min(160px,40vw);width:auto;">
+                </div>
+                <div id="mars-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.2rem;">
+                  <img id="mars-name" src="assets/Mars_Name.png" style="width:min(80px,22vw);">
+                  <img src="assets/Mars_God.png" style="height:min(160px,40vw);width:auto;">
+                </div>
               </div>
             </div>
             <div class="scene-body">We've already got a whole month named after a war god.</div>
@@ -1885,16 +1871,17 @@
           }, 800);
         } else {
           scene.innerHTML = `
-            <div class="scene-graphic-static" id="tue-scene" style="display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:auto auto;align-items:end;justify-items:center;width:100%;gap:0.5rem;">
-              <img id="tue-box" src="assets/Tue.png" style="grid-column:1/4;grid-row:1;width:min(200px,52vw);">
-              <div id="tyr-wrap" style="grid-column:1;grid-row:2;display:flex;flex-direction:column;align-items:center;gap:0.2rem;">
-                <img id="tyr-name" src="assets/Tyr_Name.png" style="width:clamp(70px,20vw,110px);">
-                <img src="assets/Tyr.png" style="width:clamp(130px,40vw,220px);">
-              </div>
-              <div style="grid-column:2;grid-row:2;width:clamp(60px,18vw,100px);"></div>
-              <div id="mars-wrap" style="grid-column:3;grid-row:2;display:flex;flex-direction:column;align-items:center;gap:0.2rem;opacity:0;">
-                <img id="mars-name" src="assets/Mars_Name.png" style="width:clamp(70px,20vw,110px);">
-                <img src="assets/Mars_God.png" style="width:clamp(130px,40vw,220px);">
+            <div class="scene-graphic-static" id="tue-scene" style="display:flex;flex-direction:column;align-items:center;width:100%;gap:0.5rem;">
+              <img id="tue-box" src="assets/Tue.png" style="width:min(160px,42vw);">
+              <div style="display:flex;width:100%;align-items:flex-end;justify-content:space-around;">
+                <div id="tyr-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.2rem;">
+                  <img id="tyr-name" src="assets/Tyr_Name.png" style="width:min(80px,22vw);">
+                  <img src="assets/Tyr.png" style="height:min(160px,40vw);width:auto;">
+                </div>
+                <div id="mars-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.2rem;opacity:0;">
+                  <img id="mars-name" src="assets/Mars_Name.png" style="width:min(80px,22vw);">
+                  <img src="assets/Mars_God.png" style="height:min(160px,40vw);width:auto;">
+                </div>
               </div>
             </div>
             <div class="scene-body"><span class="scene-highlight">War</span> doesn't need a day of the week too.</div>
