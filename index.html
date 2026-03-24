@@ -1738,27 +1738,30 @@
       (scene) => {
         const existing = document.getElementById('title-ch2-a');
         if (existing) {
-          const second = document.createElement('div');
-          second.className = 'scene-title';
-          second.id = 'title-ch2-b';
-          second.textContent = "We're getting rid of Tuesday.";
-          second.style.marginTop = '1.5rem';
-          existing.parentNode.appendChild(second);
-          requestAnimationFrame(() => requestAnimationFrame(() => second.classList.add('visible')));
-          // Add Tuesday box below text
-          const tueImg = document.createElement('img');
-          tueImg.id = 'tue-box';
-          tueImg.src = 'assets/Tue.png';
-          tueImg.style.cssText = 'width:min(200px,52vw);margin-top:1.5rem;opacity:0;transition:opacity 0.8s ease;';
-          existing.parentNode.appendChild(tueImg);
-          // Tuesday box fades in after 1s
-          setTimeout(() => { tueImg.style.opacity = '1'; }, 1000);
+          // Guard against double-append on reload
+          if (!document.getElementById('title-ch2-b')) {
+            const second = document.createElement('div');
+            second.className = 'scene-title';
+            second.id = 'title-ch2-b';
+            second.textContent = "We're getting rid of Tuesday.";
+            second.style.marginTop = '1.5rem';
+            existing.parentNode.appendChild(second);
+            requestAnimationFrame(() => requestAnimationFrame(() => second.classList.add('visible')));
+          }
+          if (!document.getElementById('tue-box')) {
+            const tueImg = document.createElement('img');
+            tueImg.id = 'tue-box';
+            tueImg.src = 'assets/Tue.png';
+            tueImg.style.cssText = 'width:min(240px,60vw);margin-top:1.5rem;opacity:0;transition:opacity 0.8s ease;display:block;margin-left:auto;margin-right:auto;';
+            existing.parentNode.appendChild(tueImg);
+            setTimeout(() => { tueImg.style.opacity = '1'; }, 1000);
+          }
         } else {
           scene.classList.add('scene-text-only');
           scene.innerHTML = `
             <div class="scene-title visible" id="title-ch2-a">So here's how we make it better:</div>
             <div class="scene-title" id="title-ch2-b" style="margin-top:1.5rem;">We're getting rid of Tuesday.</div>
-            <img id="tue-box" src="assets/Tue.png" style="width:min(200px,52vw);margin-top:1.5rem;opacity:0;transition:opacity 0.8s ease;">
+            <img id="tue-box" src="assets/Tue.png" style="width:min(240px,60vw);margin-top:1.5rem;opacity:0;transition:opacity 0.8s ease;display:block;margin-left:auto;margin-right:auto;">
           `;
           requestAnimationFrame(() => requestAnimationFrame(() => {
             document.getElementById('title-ch2-b').classList.add('visible');
@@ -1773,17 +1776,18 @@
       // Beat 3: text gone, Tuesday rises to center, Tyr slides in from left + name
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-graphic" id="tue-scene" style="display:flex;flex-direction:column;align-items:center;width:100%;gap:0.5rem;">
-            <img id="tue-box" src="assets/Tue.png" style="width:min(160px,42vw);transform:translateY(30px);opacity:0;transition:transform 0.7s cubic-bezier(0.4,0,0.2,1),opacity 0.7s ease;">
-            <div style="display:flex;width:100%;align-items:flex-end;justify-content:space-around;">
-              <div id="tyr-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.2rem;transform:translateX(-110%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);">
-                <img id="tyr-name" src="assets/Tyr_Name.png" style="width:min(80px,22vw);opacity:0;transition:opacity 0.5s ease;">
-                <img src="assets/Tyr.png" style="height:min(160px,40vw);width:auto;">
-              </div>
-              <div id="mars-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.2rem;transform:translateX(110%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);opacity:0;">
-                <img id="mars-name" src="assets/Mars_Name.png" style="width:min(80px,22vw);opacity:0;transition:opacity 0.5s ease;">
-                <img src="assets/Mars_God.png" style="height:min(160px,40vw);width:auto;">
-              </div>
+          <div class="scene-graphic" id="tue-scene" style="position:relative;width:100%;height:min(55vh,420px);">
+            <!-- Tyr — left side, large -->
+            <div id="tyr-wrap" style="position:absolute;left:0;bottom:0;display:flex;flex-direction:column;align-items:flex-start;transform:translateX(-110%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);">
+              <img id="tyr-name" src="assets/Tyr_Name.png" style="width:min(120px,30vw);margin-left:0.5rem;opacity:0;transition:opacity 0.5s ease;">
+              <img src="assets/Tyr.png" style="height:min(45vh,340px);width:auto;">
+            </div>
+            <!-- Tuesday — centered -->
+            <img id="tue-box" src="assets/Tue.png" style="position:absolute;left:50%;top:30%;transform:translate(-50%,20px);width:min(130px,33vw);opacity:0;transition:transform 0.7s cubic-bezier(0.4,0,0.2,1),opacity 0.7s ease;">
+            <!-- Mars — right side, large -->
+            <div id="mars-wrap" style="position:absolute;right:0;bottom:0;display:flex;flex-direction:column;align-items:flex-end;transform:translateX(110%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);opacity:0;">
+              <img id="mars-name" src="assets/Mars_Name.png" style="width:min(120px,30vw);margin-right:0.5rem;opacity:0;transition:opacity 0.5s ease;">
+              <img src="assets/Mars_God.png" style="height:min(45vh,340px);width:auto;">
             </div>
           </div>
           <div class="scene-body">Tuesday is named after a Norse God of War who's mostly been forgotten.</div>
@@ -1791,7 +1795,7 @@
         animate(scene);
         requestAnimationFrame(() => requestAnimationFrame(() => {
           const tue = document.getElementById('tue-box');
-          if (tue) { tue.style.transform = 'translateY(0)'; tue.style.opacity = '1'; }
+          if (tue) { tue.style.transform = 'translate(-50%, 0)'; tue.style.opacity = '1'; }
           setTimeout(() => {
             const tyr = document.getElementById('tyr-wrap');
             if (tyr) tyr.style.transform = 'translateX(0)';
@@ -1830,17 +1834,15 @@
           }
         } else {
           scene.innerHTML = `
-            <div class="scene-graphic-static" id="tue-scene" style="display:flex;flex-direction:column;align-items:center;width:100%;gap:0.5rem;">
-              <img id="tue-box" src="assets/Tue.png" style="width:min(160px,42vw);">
-              <div style="display:flex;width:100%;align-items:flex-end;justify-content:space-around;">
-                <div id="tyr-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.2rem;">
-                  <img id="tyr-name" src="assets/Tyr_Name.png" style="width:min(80px,22vw);">
-                  <img src="assets/Tyr.png" style="height:min(160px,40vw);width:auto;">
-                </div>
-                <div id="mars-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.2rem;">
-                  <img id="mars-name" src="assets/Mars_Name.png" style="width:min(80px,22vw);">
-                  <img src="assets/Mars_God.png" style="height:min(160px,40vw);width:auto;">
-                </div>
+            <div class="scene-graphic-static" id="tue-scene" style="position:relative;width:100%;height:min(55vh,420px);">
+              <div id="tyr-wrap" style="position:absolute;left:0;bottom:0;display:flex;flex-direction:column;align-items:flex-start;">
+                <img id="tyr-name" src="assets/Tyr_Name.png" style="width:min(120px,30vw);margin-left:0.5rem;">
+                <img src="assets/Tyr.png" style="height:min(45vh,340px);width:auto;">
+              </div>
+              <img id="tue-box" src="assets/Tue.png" style="position:absolute;left:50%;top:30%;transform:translateX(-50%);width:min(130px,33vw);">
+              <div id="mars-wrap" style="position:absolute;right:0;bottom:0;display:flex;flex-direction:column;align-items:flex-end;">
+                <img id="mars-name" src="assets/Mars_Name.png" style="width:min(120px,30vw);margin-right:0.5rem;">
+                <img src="assets/Mars_God.png" style="height:min(45vh,340px);width:auto;">
               </div>
             </div>
             <div class="scene-body">We've already got a whole month named after a war god.</div>
@@ -1871,17 +1873,15 @@
           }, 800);
         } else {
           scene.innerHTML = `
-            <div class="scene-graphic-static" id="tue-scene" style="display:flex;flex-direction:column;align-items:center;width:100%;gap:0.5rem;">
-              <img id="tue-box" src="assets/Tue.png" style="width:min(160px,42vw);">
-              <div style="display:flex;width:100%;align-items:flex-end;justify-content:space-around;">
-                <div id="tyr-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.2rem;">
-                  <img id="tyr-name" src="assets/Tyr_Name.png" style="width:min(80px,22vw);">
-                  <img src="assets/Tyr.png" style="height:min(160px,40vw);width:auto;">
-                </div>
-                <div id="mars-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.2rem;opacity:0;">
-                  <img id="mars-name" src="assets/Mars_Name.png" style="width:min(80px,22vw);">
-                  <img src="assets/Mars_God.png" style="height:min(160px,40vw);width:auto;">
-                </div>
+            <div class="scene-graphic-static" id="tue-scene" style="position:relative;width:100%;height:min(55vh,420px);">
+              <div id="tyr-wrap" style="position:absolute;left:0;bottom:0;display:flex;flex-direction:column;align-items:flex-start;">
+                <img id="tyr-name" src="assets/Tyr_Name.png" style="width:min(120px,30vw);margin-left:0.5rem;">
+                <img src="assets/Tyr.png" style="height:min(45vh,340px);width:auto;">
+              </div>
+              <img id="tue-box" src="assets/Tue.png" style="position:absolute;left:50%;top:30%;transform:translateX(-50%);width:min(130px,33vw);">
+              <div id="mars-wrap" style="position:absolute;right:0;bottom:0;display:flex;flex-direction:column;align-items:flex-end;opacity:0;">
+                <img id="mars-name" src="assets/Mars_Name.png" style="width:min(120px,30vw);margin-right:0.5rem;">
+                <img src="assets/Mars_God.png" style="height:min(45vh,340px);width:auto;">
               </div>
             </div>
             <div class="scene-body"><span class="scene-highlight">War</span> doesn't need a day of the week too.</div>
