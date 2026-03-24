@@ -2244,31 +2244,31 @@
     // ── Chapter 5: Holidays ──────────────────────────────────────
     // Pie slice 4
     [
-      // Beat 1: every month starts Sunday
+      // Beat 5-1
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-graphic">
-            <img src="assets/pres/full-year-calendar.png" alt="Full year calendar" style="max-width:360px;width:100%;">
-          </div>
-          <div class="scene-body">Every month starts on <span class="scene-highlight">Sunday</span>. Every month ends on Saturday. Which means every date always falls on the same day of the week. Every year. Forever.</div>
+          <div class="scene-body">With this new calendar, every single month <span class="scene-highlight">always</span> starts on a Sunday and ends on a Saturday.</div>
         `;
         animate(scene);
       },
-      // Beat 2: Halloween
+      // Beat 5-2
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-body">And with the months in sync with the weeks, <span class="scene-highlight">all holidays</span> now fall on the <span class="scene-highlight">same date</span> every year.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 5-3
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic" style="display:flex;align-items:center;gap:1rem;justify-content:center;">
-            <img src="assets/intro/halloween.png" style="width:4rem;height:4rem;object-fit:contain;">
-            <div style="text-align:left;">
-              <div style="font-size:1.8rem;font-weight:900;color:var(--white);">Oct 30</div>
-              <div style="font-size:1rem;font-weight:700;color:var(--orange);">Always Saturday</div>
-            </div>
+            <img src="assets/intro/turkey.png" style="width:4rem;height:4rem;object-fit:contain;">
           </div>
-          <div class="scene-body">Halloween is always a Saturday. Trick-or-treating will never again be squeezed into a school night.</div>
+          <div class="scene-body">No one ever knows when Thanksgiving is, because the <span class="scene-highlight">fourth Thursday in November</span> could fall anywhere from the 22nd to the 28th.</div>
         `;
         animate(scene);
       },
-      // Beat 3: Thanksgiving
+      // Beat 5-4
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic" style="display:flex;align-items:center;gap:1rem;justify-content:center;">
@@ -2278,31 +2278,64 @@
               <div style="font-size:1rem;font-weight:700;color:var(--orange);">Always Thursday</div>
             </div>
           </div>
-          <div class="scene-body">Thanksgiving is always November 22nd. No more guessing.</div>
+          <div class="scene-body">In the Farch calendar, Thanksgiving is <span class="scene-highlight">always</span> on the 22nd.</div>
         `;
         animate(scene);
       },
-      // Beat 4: Christmas
+      // Beat 5-5
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-graphic" style="display:flex;align-items:center;gap:1rem;justify-content:center;">
+          <div class="scene-body">What about holidays that are fixed to a date of the month, but happen on different days of the week each year? No more!</div>
+        `;
+        animate(scene);
+      },
+      // Beat 5-6
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic" style="display:flex;align-items:center;justify-content:center;gap:1.5rem;">
             <img src="assets/intro/christmas.png" style="width:4rem;height:4rem;object-fit:contain;">
-            <div style="text-align:left;">
-              <div style="font-size:1.8rem;font-weight:900;color:var(--white);">Dec 25</div>
-              <div style="font-size:1rem;font-weight:700;color:var(--orange);">Always Sunday</div>
-            </div>
+            <img src="assets/intro/newyears.png" style="width:4rem;height:4rem;object-fit:contain;">
+            <img src="assets/intro/halloween.png" style="width:4rem;height:4rem;object-fit:contain;">
           </div>
-          <div class="scene-body">Christmas is always a Sunday. Then 5 days of December left, then Farch, then back to Sunday January 1st.</div>
+          <div class="scene-body">With the Farch calendar, Christmas is <span class="scene-highlight">always</span> on a Sunday. New Year's Eve and Halloween? They're always on Saturday night.</div>
         `;
         animate(scene);
       },
-      // Beat 5: 31st birthday one-liner
+      // Beat 5-7
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-graphic">
-            <img src="assets/pres/birthday-31.png" alt="July 31st birthday person" style="max-height:220px;">
+          <div class="scene-graphic" style="display:flex;align-items:center;justify-content:center;gap:1.5rem;">
+            <img src="assets/intro/halloween.png" style="width:4rem;height:4rem;object-fit:contain;">
           </div>
-          <div class="scene-body">If your birthday is on the 31st, you celebrate on the 30th now.<br>You'll be fine.</div>
+          <div class="scene-body">The very dumb tradition of filling kids up with <span class="scene-highlight">candy</span> and then sending them to <span class="scene-highlight">school</span> the next morning is eliminated.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 5-8
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-body">All national holidays are now <span class="scene-highlight">locked</span> to both a <span class="scene-highlight">day</span> of the week and a <span class="scene-highlight">date</span> of the month.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 5-9
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-body">I know what you're thinking. What about <span class="scene-highlight">leap year</span>?</div>
+        `;
+        animate(scene);
+      },
+      // Beat 5-10
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-body">We take that extra <span class="scene-highlight">29th day</span> out of February and instead add a <span class="scene-highlight">6th day</span> to every fourth year of Farch.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 5-11
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-body">It's already a tiny, weird add-on month. Farch is where we hide our mess.</div>
         `;
         animate(scene);
       },
@@ -2311,52 +2344,111 @@
     // ── Chapter 6: The Egyptians ─────────────────────────────────
     // Pie slice 5
     [
-      // Beat 1: Egyptian scroll art
+      // Beat 6-1
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic">
-            <img src="assets/pres/egyptian-scroll.png" alt="Egyptian astronomical art" style="max-width:340px;width:100%;border-radius:6px;">
+            <img src="assets/pres/egyptian-scroll.png" alt="" style="max-width:340px;width:100%;border-radius:6px;">
           </div>
-          <div class="scene-body">The ancient Egyptians used this exact system for nearly <span class="scene-highlight">4,000 years</span>.</div>
+          <div class="scene-body">The Farch calendar system is actually very close to what the ancient Egyptians used for almost <span class="scene-highlight">4,000 years.</span></div>
         `;
         animate(scene);
       },
-      // Beat 2: "The Five Upon the Year"
+      // Beat 6-2
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic">
-            <img src="assets/pres/five-upon-the-year.png" alt="The Five Upon the Year" style="max-width:320px;width:100%;">
+            <img src="assets/pres/egyptian-scroll.png" alt="" style="max-width:340px;width:100%;border-radius:6px;">
           </div>
-          <div class="scene-body">They called their extra days <span class="scene-highlight">"The Five Upon the Year."</span></div>
+          <div class="scene-body">They loved the number <span class="scene-highlight">360</span>…</div>
         `;
         animate(scene);
       },
-      // Beat 3: hieroglyphics → FARCH reveal
+      // Beat 6-3
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-graphic" style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
-            <img src="assets/pres/hieroglyphics.png" alt="Egyptian hieroglyphics" style="max-width:300px;width:100%;">
-            <div style="font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;">which looks like…</div>
-            <img src="assets/pres/farch-hieroglyphic.png" alt="FARcH" style="max-width:300px;width:100%;">
+          <div class="scene-graphic">
+            <img src="assets/pres/egyptian-scroll.png" alt="" style="max-width:340px;width:100%;border-radius:6px;">
           </div>
+          <div class="scene-body">…and they should, because it's <span class="scene-highlight">astoundingly useful</span>.</div>
         `;
         animate(scene);
       },
-      // Beat 4: interactive 360 wheel
+      // Beat 6-4
       (scene) => {
         scene.innerHTML = `
-          <div class="scene-body" style="margin-bottom:0.5rem;">360 divides evenly by <span class="scene-highlight">24 different numbers</span>.</div>
+          <div class="scene-graphic" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+            <div style="font-family:'Work Sans',sans-serif;font-size:5rem;font-weight:700;color:var(--orange);line-height:1;">360</div>
+            <div style="font-size:1.1rem;font-weight:700;color:var(--white);letter-spacing:0.04em;">colossally abundant number</div>
+          </div>
+          <div class="scene-body">In mathematics, it's what's known as a <span class="scene-highlight">colossally abundant number</span>.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 6-5
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-body" style="margin-bottom:0.5rem;">That means you can break it up evenly in a lot of different ways.</div>
           ${buildInteractive360()}
         `;
         animate(scene);
         initInteractive360(scene);
       },
-      // Beat 5: Mars
+      // Beat 6-6
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/five-upon-the-year.png" alt="" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">The Egyptians called their extra 5 day filler month <span class="scene-highlight">"The Five Upon the Year,"</span> which is written like this in hieroglyphics…</div>
+        `;
+        animate(scene);
+      },
+      // Beat 6-7
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic" style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
+            <img src="assets/pres/hieroglyphics.png" alt="" style="max-width:300px;width:100%;">
+            <div style="font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;">which looks like…</div>
+            <img src="assets/pres/farch-hieroglyphic.png" alt="" style="max-width:300px;width:100%;">
+          </div>
+          <div class="scene-body">…and that looks like <span class="scene-highlight">Farch.</span></div>
+        `;
+        animate(scene);
+      },
+      // Beat 6-8
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/earth-orbit.png" alt="" style="max-width:320px;width:100%;">
+          </div>
+          <div class="scene-body">We earthlings are <span class="scene-highlight">incredibly fortunate</span> that with each orbit of the sun, our planet spins around at a rate so very close to this <span class="scene-highlight">spectacular number</span>.</div>
+        `;
+        animate(scene);
+      },
+      // Beat 6-9
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic" style="font-size:4rem;text-align:center;">🔴</div>
-          <div class="scene-title">Mars spins <span class="scene-highlight">669</span> times per orbit.</div>
-          <div class="scene-body">A terrible number. Yet another reason Mars would be an awful place to live.</div>
+          <div class="scene-body">Mars spins <span class="scene-highlight">669</span> times with each orbit of the sun…</div>
+        `;
+        animate(scene);
+      },
+      // Beat 6-10
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic" style="font-size:4rem;text-align:center;">🔴</div>
+          <div class="scene-body">…which is a terrible number, and yet another of the many reasons Mars would be an <span class="scene-highlight">awful place to live.</span></div>
+        `;
+        animate(scene);
+      },
+      // Beat 6-11
+      (scene) => {
+        scene.innerHTML = `
+          <div class="scene-graphic">
+            <img src="assets/pres/egyptian-scroll.png" alt="" style="max-width:340px;width:100%;border-radius:6px;">
+          </div>
+          <div class="scene-body">So let's make use of <span class="scene-highlight">360</span> like our friends the <span class="scene-highlight">Egyptians</span>, and squeeze the messy leftovers into Farch.</div>
         `;
         animate(scene);
       },
