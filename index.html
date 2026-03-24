@@ -743,6 +743,12 @@
   <div class="pres-screen" id="pres-screen">
     <!-- Scene content renders here -->
   </div>
+  <div id="beat-label" style="
+    position:absolute;top:0.5rem;right:0.75rem;
+    font-family:'Nunito',sans-serif;font-size:0.65rem;font-weight:800;
+    color:rgba(255,255,255,0.35);letter-spacing:0.08em;
+    pointer-events:none;z-index:50;
+  "></div>
   <div class="pres-nav-row">
     <button class="pres-nav-btn pres-nav-back" id="pres-nav-back" onclick="presGoBack()">&#8592;</button>
     <button class="pres-nav-btn pres-nav-fwd" id="pres-nav-fwd" onclick="presGoForward()">&#8594;</button>
@@ -1734,7 +1740,7 @@
           const tueImg = document.createElement('img');
           tueImg.id = 'tue-box';
           tueImg.src = 'assets/Tue.png';
-          tueImg.style.cssText = 'width:160px;margin-top:1.5rem;opacity:0;transition:opacity 0.8s ease;';
+          tueImg.style.cssText = 'width:min(480px,70vw);margin-top:1.5rem;opacity:0;transition:opacity 0.8s ease;';
           existing.parentNode.appendChild(tueImg);
           // Tuesday box fades in after 1s
           setTimeout(() => { tueImg.style.opacity = '1'; }, 1000);
@@ -1743,7 +1749,7 @@
           scene.innerHTML = `
             <div class="scene-title visible" id="title-ch2-a">So here's how we make it better:</div>
             <div class="scene-title" id="title-ch2-b" style="margin-top:1.5rem;">We're getting rid of Tuesday.</div>
-            <img id="tue-box" src="assets/Tue.png" style="width:160px;margin-top:1.5rem;opacity:0;transition:opacity 0.8s ease;">
+            <img id="tue-box" src="assets/Tue.png" style="width:min(480px,70vw);margin-top:1.5rem;opacity:0;transition:opacity 0.8s ease;">
           `;
           requestAnimationFrame(() => requestAnimationFrame(() => {
             document.getElementById('title-ch2-b').classList.add('visible');
@@ -1759,17 +1765,21 @@
       (scene) => {
         scene.innerHTML = `
           <div class="scene-graphic" id="tue-scene" style="
-            display:flex;align-items:center;justify-content:center;
-            width:100%;position:relative;min-height:220px;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            width:100%;gap:0.75rem;
           ">
-            <div id="tyr-wrap" style="position:absolute;left:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;transform:translateX(-120%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);">
-              <img id="tyr-name" src="assets/Tyr_Name.png" style="width:90px;opacity:0;transition:opacity 0.5s ease;">
-              <img src="assets/Tyr.png" style="width:130px;">
-            </div>
-            <img id="tue-box" src="assets/Tue.png" style="width:160px;transform:translateY(50px);opacity:0;transition:transform 0.7s cubic-bezier(0.4,0,0.2,1),opacity 0.7s ease;">
-            <div id="mars-wrap" style="position:absolute;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;transform:translateX(120%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);opacity:0;">
-              <img id="mars-name" src="assets/Mars_Name.png" style="width:110px;opacity:0;transition:opacity 0.5s ease;">
-              <img src="assets/Mars_God.png" style="width:130px;">
+            <!-- Tuesday centered at top -->
+            <img id="tue-box" src="assets/Tue.png" style="width:min(480px,70vw);transform:translateY(40px);opacity:0;transition:transform 0.7s cubic-bezier(0.4,0,0.2,1),opacity 0.7s ease;align-self:center;">
+            <!-- Tyr + Mars row below -->
+            <div style="display:flex;width:100%;align-items:flex-end;justify-content:space-between;">
+              <div id="tyr-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;transform:translateX(-120%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);">
+                <img id="tyr-name" src="assets/Tyr_Name.png" style="width:80px;opacity:0;transition:opacity 0.5s ease;">
+                <img src="assets/Tyr.png" style="width:120px;">
+              </div>
+              <div id="mars-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;transform:translateX(120%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);opacity:0;">
+                <img id="mars-name" src="assets/Mars_Name.png" style="width:100px;opacity:0;transition:opacity 0.5s ease;">
+                <img src="assets/Mars_God.png" style="width:120px;">
+              </div>
             </div>
           </div>
           <div class="scene-body">Tuesday is named after a Norse God of War who's mostly been forgotten.</div>
@@ -1816,15 +1826,17 @@
           }
         } else {
           scene.innerHTML = `
-            <div class="scene-graphic-static" id="tue-scene" style="display:flex;align-items:center;justify-content:center;width:100%;position:relative;min-height:220px;">
-              <div id="tyr-wrap" style="position:absolute;left:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
-                <img id="tyr-name" src="assets/Tyr_Name.png" style="width:90px;">
-                <img src="assets/Tyr.png" style="width:130px;">
-              </div>
-              <img id="tue-box" src="assets/Tue.png" style="width:160px;">
-              <div id="mars-wrap" style="position:absolute;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
-                <img id="mars-name" src="assets/Mars_Name.png" style="width:110px;">
-                <img src="assets/Mars_God.png" style="width:130px;">
+            <div class="scene-graphic-static" id="tue-scene" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;gap:0.75rem;">
+              <img id="tue-box" src="assets/Tue.png" style="width:min(480px,70vw);align-self:center;">
+              <div style="display:flex;width:100%;align-items:flex-end;justify-content:space-between;">
+                <div id="tyr-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+                  <img id="tyr-name" src="assets/Tyr_Name.png" style="width:80px;">
+                  <img src="assets/Tyr.png" style="width:120px;">
+                </div>
+                <div id="mars-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+                  <img id="mars-name" src="assets/Mars_Name.png" style="width:100px;">
+                  <img src="assets/Mars_God.png" style="width:120px;">
+                </div>
               </div>
             </div>
             <div class="scene-body">We've already got a whole month named after a war god.</div>
@@ -1855,15 +1867,17 @@
           }, 800);
         } else {
           scene.innerHTML = `
-            <div class="scene-graphic-static" id="tue-scene" style="display:flex;align-items:center;justify-content:center;width:100%;position:relative;min-height:220px;">
-              <div id="tyr-wrap" style="position:absolute;left:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
-                <img id="tyr-name" src="assets/Tyr_Name.png" style="width:90px;">
-                <img src="assets/Tyr.png" style="width:130px;">
-              </div>
-              <img id="tue-box" src="assets/Tue.png" style="width:160px;">
-              <div id="mars-wrap" style="position:absolute;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;opacity:0;">
-                <img id="mars-name" src="assets/Mars_Name.png" style="width:110px;">
-                <img src="assets/Mars_God.png" style="width:130px;">
+            <div class="scene-graphic-static" id="tue-scene" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;gap:0.75rem;">
+              <img id="tue-box" src="assets/Tue.png" style="width:min(480px,70vw);align-self:center;">
+              <div style="display:flex;width:100%;align-items:flex-end;justify-content:space-between;">
+                <div id="tyr-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+                  <img id="tyr-name" src="assets/Tyr_Name.png" style="width:80px;">
+                  <img src="assets/Tyr.png" style="width:120px;">
+                </div>
+                <div id="mars-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;opacity:0;">
+                  <img id="mars-name" src="assets/Mars_Name.png" style="width:100px;">
+                  <img src="assets/Mars_God.png" style="width:120px;">
+                </div>
               </div>
             </div>
             <div class="scene-body"><span class="scene-highlight">War</span> doesn't need a day of the week too.</div>
@@ -1962,7 +1976,11 @@
         animateCaption(scene);
       },
 
-      // ── Weeks + Months ───────────────────────────────────────────
+    ],
+
+    // ── Chapter 3: Months ────────────────────────────────────────
+    // Pie slice 2
+    [
       // Beat 1: all months 30 days
       (scene) => {
         scene.innerHTML = `
@@ -2445,6 +2463,10 @@
     CHAPTERS[currentChapter][currentBeat](scene);
     drawProgressPie();
     updateBackArrow();
+
+    // Update debug beat label
+    const beatLabel = document.getElementById('beat-label');
+    if (beatLabel) beatLabel.textContent = `${currentChapter + 1}-${currentBeat + 1}`;
 
     if (isLastBeat()) {
       hideFwdArrow(true);
